@@ -1,0 +1,3 @@
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS totp_secret VARCHAR(128),
+  ADD COLUMN IF NOT EXISTS passkey_code_hash VARCHAR(255);

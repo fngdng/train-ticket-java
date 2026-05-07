@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Vé của tôi</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #eef2ff 0%, #e6ecff 45%, #f6f8ff 100%);
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 16px 44px;
+    }
+    .hero {
+      background: linear-gradient(135deg, #2448ff 0%, #00a6d1 100%);
+      color: #fff;
+      border-radius: 18px;
+      padding: 26px 24px;
+      box-shadow: 0 14px 34px rgba(23, 55, 173, 0.25);
+      margin-bottom: 18px;
+    }
+    .hero h1 { margin: 0 0 6px; font-size: 30px; }
+    .hero p { margin: 0; opacity: 0.95; }
+    .grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    .panel {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(15, 40, 110, 0.08);
+      padding: 16px;
+    }
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+    .ticket-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .ticket-card {
+      border: 1px solid #e7ebff;
+      border-radius: 12px;
+      padding: 14px;
+      background: #fcfdff;
+    }
+    .ticket-qr-wrap {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .ticket-qr-box {
+      width: 156px;
+      height: 156px;
+      border: 1px solid #dfe6ff;
+      border-radius: 12px;
+      background: #fff;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ticket-qr-box canvas,
+    .ticket-qr-box img {
+      width: 140px;
+      height: 140px;
+      display: block;
+    }
+    .ticket-qr-empty {
+      width: 140px;
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 12px;
+      color: #667085;
+      line-height: 1.4;
+      padding: 8px;
+    }
+    .ticket-qr-hint {
+      font-size: 12px;
+      color: #667085;
+    }
+    .ticket-code {
+      display: inline-block;
+      background: #eff3ff;
+      color: #2243dd;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 8px;
+      word-break: break-all;
+    }
+    .meta {
+      color: #495057;
+      font-size: 14px;
+      margin: 3px 0;
+    }
+    .row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .status {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #edf0f4;
+      color: #2b2f36;
+    }
+    .status.ok { background: #e7f7ea; color: #1d7335; }
+    .status.pending { background: #fff4e5; color: #8a5500; }
+    .status.fail { background: #fdecec; color: #a31515; }
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 9px 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .btn.primary { background: #2146ea; color: #fff; }
+    .btn.ghost { background: #eef2ff; color: #2947cd; }
+    .muted { color: #666; font-size: 13px; }
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: vertical;
+      border: 1px solid #d7deff;
+      border-radius: 10px;
+      padding: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+    }
+    pre {
+      white-space: pre-wrap;
+      background: #0f172a;
+      color: #d9e2ff;
+      border-radius: 10px;
+      padding: 10px;
+      min-height: 96px;
+      font-size: 12px;
+      overflow-x: auto;
+    }
+    .alert {
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .alert.error { background: #fde8e8; color: #8b1e1e; }
+    .alert.info { background: #eef4ff; color: #1f3c9b; }
+    .navlinks {
+      margin-top: 14px;
+      font-size: 14px;
+    }
+    .navlinks a {
+      color: #2146ea;
+      text-decoration: none;
+      font-weight: 600;
+      margin-right: 12px;
+    }
+    @media (max-width: 920px) {
+      .grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Ve cua toi</h1>
+      <p>Quan ly ma dat ve, trang thai thanh toan, va xac minh token QR.</p>
+    </div>
+
+    <div class="grid">
+      <section class="panel">
+        <h2>Danh sach ve</h2>
+        <div id="ticketAlert"></div>
+        <div id="ticketList" class="ticket-list"></div>
+      </section>
+
+      <aside class="panel">
+        <h2>Kiem tra QR token</h2>
+        <p class="muted">Dinh dang token da ky so tu he thong.</p>
+        <textarea id="ticketToken" placeholder="Dan ticket token vao day"></textarea>
+        <div class="row">
+          <button class="btn primary" id="verifyBtn" type="button">Xac minh token</button>
+        </div>
+        <pre id="verifyResult">{}</pre>
+        <div class="navlinks">
+          <a href="/">Trang chu</a>
+          <a href="/account.html">Tai khoan</a>
+          <a href="/scan.html">Scan QR bang camera</a>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('auth_token');
+    if(!token){ location.href = '/auth.html'; }
+
+    async function api(path, options = {}) {
+      const headers = Object.assign({'Authorization': `Bearer ${token}`}, options.headers || {});
+      if (options.body && !headers['Content-Type']) {
+        headers['Content-Type'] = 'application/json';
+      }
+      const res = await fetch(path, Object.assign({}, options, { headers }));
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.detail || 'Yêu cầu thất bại');
+      }
+      return data;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function paymentStatusClass(status) {
+      const s = String(status || '').toUpperCase();
+      if (s === 'COMPLETED' || s === 'PAID' || s === 'SUCCESS') return 'ok';
+      if (s === 'FAILED' || s === 'CANCELLED' || s === 'ERROR') return 'fail';
+      return 'pending';
+    }
+
+    function parseLastTicket() {
+      try {
+        const parsed = JSON.parse(sessionStorage.getItem('last_ticket') || 'null');
+        if (!parsed) {
+          return null;
+        }
+        if (parsed.createdAt) {
+          const ageMs = Date.now() - new Date(parsed.createdAt).getTime();
+          if (Number.isFinite(ageMs) && ageMs > 1000 * 60 * 60 * 6) {
+            sessionStorage.removeItem('last_ticket');
+            return null;
+          }
+        }
+        return parsed;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function createQrUrlFromToken(tokenValue) {
+      if (!tokenValue) return '';
+      return 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(tokenValue);
+    }
+
+    function renderSingleTicketCard(ticket, isRecent = false) {
+      const bookingCode = ticket.bookingId || '';
+      const train = ticket.train || '--';
+      const origin = ticket.origin || ticket.from || '--';
+      const destination = ticket.destination || ticket.to || '--';
+      const departure = ticket.departure || '';
+      const arrival = ticket.arrival || '';
+      const paymentStatus = ticket.paymentStatus || 'PENDING';
+      const statusClass = paymentStatusClass(paymentStatus);
+      const tokenValue = ticket.ticketToken || '';
+      const qrUrl = ticket.ticketQrUrl || createQrUrlFromToken(tokenValue);
+
+      return `
+        <article class="ticket-card" data-booking-id="${escapeHtml(bookingCode)}" data-token="${escapeHtml(tokenValue)}" data-qr-url="${escapeHtml(qrUrl)}">
+          ${isRecent ? '<div class="status pending">Moi dat</div>' : ''}
+          <div class="ticket-code">Ma dat ve: ${escapeHtml(bookingCode || 'N/A')}</div>
+          <p class="meta"><strong>${escapeHtml(train)}</strong></p>
+          <p class="meta">${escapeHtml(origin)} -> ${escapeHtml(destination)}</p>
+          <p class="meta">${escapeHtml(departure)} ${arrival ? '| ' + escapeHtml(arrival) : ''}</p>
+          <div class="row">
+            <span class="status ${statusClass}">Thanh toan: ${escapeHtml(paymentStatus)}</span>
+            ${tokenValue ? `<button class="btn ghost" type="button" onclick="fillToken('${escapeHtml(tokenValue)}')">Nap token</button>` : ''}
+          </div>
+          <div class="ticket-qr-wrap">
+            <div class="ticket-qr-box"><canvas class="ticket-qr-canvas"></canvas></div>
+            <div class="ticket-qr-hint">Quet QR nay de lay token ve.</div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderTickets(tickets) {
+      const list = document.getElementById('ticketList');
+      const recent = parseLastTicket();
+      const cards = [];
+      const ticketArray = Array.isArray(tickets) ? tickets : [];
+
+      let mergedRecent = null;
+      if (recent && recent.bookingId) {
+        const matchedTicket = ticketArray.find(ticket => String(ticket.bookingId || '') === String(recent.bookingId || ''));
+        mergedRecent = Object.assign({}, recent, matchedTicket || {}, {
+          bookingId: (matchedTicket && matchedTicket.bookingId) || recent.bookingId,
+          orderId: recent.orderId || (matchedTicket && matchedTicket.orderId) || '',
+          ticketToken: (matchedTicket && matchedTicket.ticketToken) || recent.ticketToken || '',
+          ticketQrUrl: (matchedTicket && matchedTicket.ticketQrUrl) || recent.ticketQrUrl || '',
+          train: (matchedTicket && matchedTicket.train) || recent.train || '',
+          from: recent.from || (matchedTicket && matchedTicket.origin) || '',
+          to: recent.to || (matchedTicket && matchedTicket.destination) || '',
+          departure: (matchedTicket && matchedTicket.departure) || recent.departure || '',
+          arrival: (matchedTicket && matchedTicket.arrival) || recent.arrival || '',
+          paymentStatus: (matchedTicket && matchedTicket.paymentStatus) || recent.paymentStatus || 'PENDING'
+        });
+      }
+
+      const shouldShowRecent = mergedRecent && mergedRecent.bookingId && (
+        ticketArray.some(ticket => String(ticket.bookingId || '') === String(mergedRecent.bookingId || ''))
+        || !!mergedRecent.ticketToken
+      );
+
+      if (shouldShowRecent) {
+        const recentQr = mergedRecent.ticketQrUrl || createQrUrlFromToken(mergedRecent.ticketToken || '');
+        cards.push(renderSingleTicketCard({
+          bookingId: mergedRecent.bookingId,
+          orderId: mergedRecent.orderId,
+          ticketToken: mergedRecent.ticketToken,
+          ticketQrUrl: recentQr,
+          train: mergedRecent.train,
+          from: mergedRecent.from,
+          to: mergedRecent.to,
+          departure: mergedRecent.departure,
+          arrival: mergedRecent.arrival,
+          paymentStatus: mergedRecent.paymentStatus || 'PENDING'
+        }, true));
+      }
+
+      if (ticketArray.length > 0) {
+        const seen = new Set();
+        if (shouldShowRecent && mergedRecent && mergedRecent.bookingId) {
+          seen.add(String(mergedRecent.bookingId));
+        }
+        ticketArray.forEach(ticket => {
+          const key = String(ticket.bookingId || '');
+          if (!seen.has(key)) {
+            cards.push(renderSingleTicketCard(ticket));
+            seen.add(key);
+          }
+        });
+      }
+
+      if (cards.length === 0) {
+        list.innerHTML = '<div class="alert info">Chua co ve nao. Hay dat ve de thay ma dat ve tai day.</div>';
+        return;
+      }
+      list.innerHTML = cards.join('');
+      hydrateAllTicketCards();
+    }
+
+    async function hydrateRecentTicket() {
+      const recent = parseLastTicket();
+      if (!recent || !recent.bookingId) {
+        return;
+      }
+      if (recent.ticketToken && recent.ticketQrUrl) {
+        return;
+      }
+      try {
+        const qrData = await api(`/tickets/${encodeURIComponent(recent.bookingId)}/qr`);
+        const merged = Object.assign({}, recent, {
+          ticketToken: qrData.ticketToken || recent.ticketToken || '',
+          ticketQrUrl: qrData.ticketQrUrl || createQrUrlFromToken(qrData.ticketToken || recent.ticketToken || ''),
+          train: recent.train || qrData.train || '',
+          from: recent.from || qrData.origin || '',
+          to: recent.to || qrData.destination || '',
+          paymentStatus: qrData.paymentStatus || recent.paymentStatus || 'PENDING'
+        });
+        sessionStorage.setItem('last_ticket', JSON.stringify(merged));
+      } catch (_) {
+        if (!recent.ticketToken) {
+          sessionStorage.removeItem('last_ticket');
+        }
+      }
+    }
+
+    async function hydrateAllTicketCards() {
+      const cards = Array.from(document.querySelectorAll('.ticket-card'));
+      for (const card of cards) {
+        await ensureCardHasToken(card);
+        await drawQrForCard(card);
+      }
+    }
+
+    async function ensureCardHasToken(card) {
+      const token = card.dataset.token || '';
+      const bookingId = card.dataset.bookingId || '';
+      if (token || !bookingId) {
+        return;
+      }
+      try {
+        const qrData = await api(`/tickets/${encodeURIComponent(bookingId)}/qr`);
+        card.dataset.token = qrData.ticketToken || '';
+        card.dataset.qrUrl = qrData.ticketQrUrl || createQrUrlFromToken(qrData.ticketToken || '');
+
+        const row = card.querySelector('.row');
+        if (row && qrData.ticketToken && !row.querySelector('.btn.ghost')) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'btn ghost';
+          button.textContent = 'Nap token';
+          button.addEventListener('click', () => fillToken(qrData.ticketToken));
+          row.appendChild(button);
+        }
+
+        const recent = parseLastTicket();
+        if (recent && recent.bookingId === bookingId) {
+          sessionStorage.setItem('last_ticket', JSON.stringify(Object.assign({}, recent, {
+            ticketToken: qrData.ticketToken || recent.ticketToken || '',
+            ticketQrUrl: qrData.ticketQrUrl || recent.ticketQrUrl || ''
+          })));
+        }
+      } catch (_) {
+        // leave card as-is if hydration fails
+      }
+    }
+
+    async function drawQrForCard(card) {
+      const canvas = card.querySelector('.ticket-qr-canvas');
+      if (!canvas) {
+        return;
+      }
+      const token = card.dataset.token || '';
+      const qrUrl = card.dataset.qrUrl || '';
+
+      if (token && window.QRCode && window.QRCode.toCanvas) {
+        try {
+          await window.QRCode.toCanvas(canvas, token, {
+            width: 140,
+            margin: 1,
+            color: {
+              dark: '#111827',
+              light: '#ffffff'
+            }
+          });
+          return;
+        } catch (_) {
+          // fallback below
+        }
+      }
+
+      if (qrUrl) {
+        const img = new Image();
+        img.alt = 'QR ve';
+        img.width = 140;
+        img.height = 140;
+        img.src = qrUrl;
+        canvas.replaceWith(img);
+        return;
+      }
+
+      const empty = document.createElement('div');
+      empty.className = 'ticket-qr-empty';
+      empty.textContent = 'Chua lay duoc token QR';
+      canvas.replaceWith(empty);
+    }
+
+    window.fillToken = function(value) {
+      const clean = String(value || '')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'")
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>');
+      document.getElementById('ticketToken').value = clean;
+    };
+
+    document.getElementById('verifyBtn').addEventListener('click', async () => {
+      try {
+        const result = await api('/tickets/verify', {
+          method: 'POST',
+          body: JSON.stringify({ token: document.getElementById('ticketToken').value })
+        });
+        document.getElementById('verifyResult').textContent = JSON.stringify(result, null, 2);
+      } catch (err) {
+        document.getElementById('verifyResult').textContent = JSON.stringify({ valid: false, detail: err.message }, null, 2);
+      }
+    });
+
+    (async () => {
+      await hydrateRecentTicket();
+      try {
+        const tickets = await api('/tickets/my');
+        renderTickets(tickets);
+      } catch (err) {
+        const alert = document.getElementById('ticketAlert');
+        alert.innerHTML = `<div class="alert error">Khong tai duoc danh sach ve tu server: ${escapeHtml(err.message)}</div>`;
+        renderTickets([]);
+      }
+    })();
+  </script>
+</body>
+</html>

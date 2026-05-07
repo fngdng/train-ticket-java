@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Portal — Đăng Nhập</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', sans-serif; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
+      padding: 40px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .header p {
+      color: #999;
+      font-size: 14px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: 500;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      margin-top: 10px;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+    .message {
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .message.error {
+      background: #fee;
+      color: #c33;
+      border: 1px solid #fcc;
+    }
+    .message.success {
+      background: #efe;
+      color: #3c3;
+      border: 1px solid #cfc;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #999;
+    }
+    .back-link {
+      text-align: center;
+      margin-top: 15px;
+    }
+    .back-link a {
+      color: #667eea;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="header">
+      <h1>🛡️ Admin Portal</h1>
+      <p>Quản lý đặt vé tàu</p>
+    </div>
+    
+    <div id="message"></div>
+    
+    <form onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="username">Tên đăng nhập</label>
+        <input type="text" id="username" placeholder="admin username" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Mật khẩu</label>
+        <input type="password" id="password" placeholder="••••••••" required>
+      </div>
+      
+      <button type="submit" class="btn">Đăng Nhập</button>
+    </form>
+    
+    <div class="back-link">
+      <a href="/">← Quay lại trang chủ</a>
+    </div>
+    
+    <div class="footer">
+      <p>Chỉ dành cho nhân viên quản lý</p>
+    </div>
+  </div>
+
+  <script>
+    async function handleLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const msgDiv = document.getElementById('message');
+
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          msgDiv.className = 'message error';
+          msgDiv.innerText = data.detail || 'Đăng nhập thất bại';
+          return;
+        }
+
+        // Check if user is ADMIN
+        if ((data.user.role || '').toUpperCase() !== 'ADMIN') {
+          msgDiv.className = 'message error';
+          msgDiv.innerText = 'Tài khoản này không có quyền admin';
+          return;
+        }
+
+        // Save to localStorage
+        localStorage.setItem('admin_token', data.token);
+        localStorage.setItem('admin_user', JSON.stringify(data.user));
+
+        msgDiv.className = 'message success';
+        msgDiv.innerText = 'Đăng nhập thành công. Chuyển hướng...';
+        
+        setTimeout(() => {
+          window.location.href = '/admin-dashboard.html';
+        }, 1000);
+      } catch (err) {
+        msgDiv.className = 'message error';
+        msgDiv.innerText = 'Lỗi kết nối: ' + err.message;
+      }
+    }
+
+    // If already logged in as admin, redirect
+    window.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('admin_token');
+      const user = JSON.parse(localStorage.getItem('admin_user') || '{}');
+      if (token && (user.role || '').toUpperCase() === 'ADMIN') {
+        window.location.href = '/admin-dashboard.html';
+      }
+    });
+  </script>
+</body>
+</html>

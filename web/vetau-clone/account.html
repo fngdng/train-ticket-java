@@ -1,0 +1,1201 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Quản lí tài khoản</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 40px 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .account-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .account-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px 32px;
+      border-radius: 16px;
+      margin-bottom: 32px;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+    }
+
+    .account-header-content {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .account-avatar {
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .account-header-info h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .account-header-info p {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 4px;
+    }
+
+    .account-nav {
+      display: flex;
+      gap: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 16px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .account-nav button {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.8);
+      cursor: pointer;
+      font-weight: 500;
+      padding: 8px 0;
+      font-size: 14px;
+      transition: color 0.2s;
+      position: relative;
+    }
+
+    .account-nav button:hover,
+    .account-nav button.active {
+      color: white;
+    }
+
+    .account-nav button.active::after {
+      content: '';
+      position: absolute;
+      bottom: -17px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: white;
+      border-radius: 2px;
+    }
+
+    .account-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .account-card {
+      background: white;
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .account-card:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .card-title-icon {
+      font-size: 24px;
+    }
+
+    .profile-display {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .profile-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      border-left: 3px solid #667eea;
+    }
+
+    .profile-item label {
+      font-weight: 500;
+      color: #666;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .profile-item value {
+      color: #1a1a1a;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #1a1a1a;
+      font-size: 13px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      background: rgba(102, 126, 234, 0.02);
+    }
+
+    .form-group input::placeholder {
+      color: #999;
+    }
+
+    .CheckBoxWrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 16px 0;
+      padding: 12px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .CheckBoxWrapper:hover {
+      background: #f0f0f0;
+    }
+
+    .CheckBoxWrapper input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #667eea;
+    }
+
+    .CheckBoxWrapper label {
+      cursor: pointer;
+      margin: 0;
+      flex: 1;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-badge.active {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-badge.inactive {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .twofa-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .twofa-summary {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #e8ecf8;
+      background: #fafbff;
+      font-size: 13px;
+      color: #4d5d7a;
+      line-height: 1.5;
+    }
+
+    .twofa-method-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .twofa-method {
+      border: 1px solid #d9e1f4;
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      background: #fff;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .twofa-method:hover {
+      border-color: #8699df;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+
+    .twofa-method.active {
+      border-color: #667eea;
+      background: #f3f5ff;
+      box-shadow: 0 4px 14px rgba(102, 126, 234, 0.2);
+    }
+
+    .twofa-method-title {
+      font-weight: 600;
+      color: #20263a;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .twofa-method-subtitle {
+      font-size: 12px;
+      color: #60708f;
+    }
+
+    .twofa-step {
+      font-size: 12px;
+      color: #4d5d7a;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #f8f9ff;
+      border: 1px solid #e2e7ff;
+    }
+
+    .twofa-manage {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #fee2e2;
+      background: #fff5f5;
+    }
+
+    .twofa-manage p {
+      font-size: 12px;
+      color: #8f3a3a;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn.primary:active {
+      transform: translateY(0);
+    }
+
+    .btn.secondary {
+      background: #f0f0f0;
+      color: #1a1a1a;
+      border: 1px solid #ddd;
+    }
+
+    .btn.secondary:hover {
+      background: #e8e8e8;
+    }
+
+    .btn.ghost {
+      background: transparent;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+
+    .btn.ghost:hover {
+      background: rgba(102, 126, 234, 0.05);
+    }
+
+    .input-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .input-group input {
+      flex: 1;
+    }
+
+    .input-group button {
+      flex: 0 0 auto;
+    }
+
+    .alert {
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .alert.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+
+    .alert.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+
+    .footer-nav {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .footer-nav a {
+      display: inline-block;
+      margin: 0 16px;
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .footer-nav a:hover {
+      color: #764ba2;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(102, 126, 234, 0.3);
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 768px) {
+      .account-header {
+        padding: 24px 20px;
+      }
+
+      .account-header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+      }
+
+      .account-header-info h1 {
+        font-size: 24px;
+      }
+
+      .account-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .account-card {
+        padding: 20px;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .button-group .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="account-container">
+    <div class="account-header">
+      <div class="account-header-content">
+        <div class="account-avatar" id="avatarDisplay">👤</div>
+        <div class="account-header-info">
+          <h1 id="headerName">Tài khoản của bạn</h1>
+          <p id="headerUsername">Quản lí thông tin cá nhân</p>
+          <div class="account-nav">
+            <button class="nav-tab active" data-section="profile">👤 Hồ sơ</button>
+            <button class="nav-tab" data-section="security">🔒 Bảo mật</button>
+            <button class="nav-tab" data-section="preferences">⚙️ Tùy chọn</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="alertBox"></div>
+
+    <!-- Profile Section -->
+    <div id="profileSection" class="section-content">
+      <div class="account-grid">
+        <!-- Profile Info Card -->
+        <div class="account-card">
+          <div class="card-title">
+            <span class="card-title-icon">📋</span>
+            <span>Thông tin cá nhân</span>
+          </div>
+          <div id="profileDisplay" class="profile-display"></div>
+          <button class="btn primary" id="editProfileBtn" style="width: 100%; margin-top: 12px;">Chỉnh sửa thông tin</button>
+        </div>
+
+        <!-- Edit Profile Form -->
+        <div class="account-card" id="editProfileCard" style="display: none;">
+          <div class="card-title">
+            <span class="card-title-icon">✏️</span>
+            <span>Cập nhật thông tin</span>
+          </div>
+          <form id="profileForm">
+            <div class="form-group">
+              <label>Họ và tên</label>
+              <input id="fullName" type="text" placeholder="Nhập họ tên của bạn">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input id="email" type="email" placeholder="Nhập email">
+            </div>
+            <div class="form-group">
+              <label>Số điện thoại</label>
+              <input id="phone" type="tel" placeholder="Nhập số điện thoại">
+            </div>
+            <div class="button-group">
+              <button type="submit" class="btn primary">💾 Lưu thay đổi</button>
+              <button type="button" class="btn secondary" id="cancelEditBtn">Hủy</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Section -->
+    <div id="securitySection" class="section-content" style="display: none;">
+      <div class="account-grid">
+        <!-- Password Change Card -->
+        <div class="account-card">
+          <div class="card-title">
+            <span class="card-title-icon">🔐</span>
+            <span>Đổi mật khẩu</span>
+          </div>
+          <form id="passwordForm">
+            <div class="form-group">
+              <label>Mật khẩu hiện tại</label>
+              <input id="currentPassword" type="password" placeholder="Nhập mật khẩu hiện tại" required>
+            </div>
+            <div class="form-group">
+              <label>Mật khẩu mới</label>
+              <input id="newPassword" type="password" placeholder="Nhập mật khẩu mới" required>
+            </div>
+            <div class="form-group">
+              <label>Xác nhận mật khẩu mới</label>
+              <input id="confirmPassword" type="password" placeholder="Xác nhận mật khẩu mới" required>
+            </div>
+            <button type="submit" class="btn primary" style="width: 100%;">🔄 Đổi mật khẩu</button>
+          </form>
+        </div>
+
+        <!-- Two-Factor Authentication Card -->
+        <div class="account-card">
+          <div class="card-title">
+            <span class="card-title-icon">🛡️</span>
+            <span>Xác thực 2 lớp</span>
+          </div>
+          <div id="twoFactorStatus" class="profile-display">
+            <div class="profile-item">
+              <label>Trạng thái</label>
+              <span id="twoFactorStatusValue" class="status-badge inactive">Chưa bật</span>
+            </div>
+            <div class="profile-item">
+              <label>Phương thức đang bật</label>
+              <value id="twoFactorChannelValue">-</value>
+            </div>
+          </div>
+
+          <div class="twofa-stack">
+            <div class="twofa-summary">
+              Xác minh 2 bước giúp bảo vệ tài khoản ngay cả khi lộ mật khẩu
+              <div style="margin-top:8px;">
+                <a href="/2fa-inbox.html" style="color:#4b5fd1;font-weight:600;text-decoration:none;">Mở web giả lập nhận mã SMS/Email</a>
+              </div>
+              <div style="margin-top:8px;">
+                <button type="button" class="btn ghost" id="enableAllTwoFactorMethodsBtn" style="width:100%;">Bật danh sách tất cả phương thức</button>
+              </div>
+            </div>
+
+            <div id="twoFactorDisabledForm">
+              <div class="twofa-step">Bước 1: Chọn phương thức xác minh mặc định</div>
+              <div class="twofa-method-grid" id="twoFactorMethodGrid">
+                <button type="button" class="twofa-method" data-channel="email">
+                  <div class="twofa-method-title">📧 Email</div>
+                  <div class="twofa-method-subtitle">Nhận mã xác minh qua email đăng ký</div>
+                </button>
+                <button type="button" class="twofa-method" data-channel="sms">
+                  <div class="twofa-method-title">📱 SMS</div>
+                  <div class="twofa-method-subtitle">Nhận mã xác minh qua số điện thoại</div>
+                </button>
+                <button type="button" class="twofa-method" data-channel="passkey">
+                  <div class="twofa-method-title">🔑 Passkey code</div>
+                  <div class="twofa-method-subtitle">Tạo mã cá nhân để xác minh nhanh</div>
+                </button>
+                <button type="button" class="twofa-method" data-channel="totp">
+                  <div class="twofa-method-title">🧮 Google Authenticator</div>
+                  <div class="twofa-method-subtitle">Dùng ứng dụng Authenticator tạo mã 6 số</div>
+                </button>
+              </div>
+              <div class="form-group" style="display:none;">
+                <label>Chọn kênh 2 lớp</label>
+                <select id="twoFactorChannel">
+                  <option value="email">📧 Email</option>
+                  <option value="sms">📱 SMS</option>
+                  <option value="passkey">🔑 Passkey code</option>
+                  <option value="totp">🧮 Google Authenticator</option>
+                </select>
+              </div>
+            <div id="passkeySetupBox" style="display:none;margin-bottom:12px;">
+              <div class="form-group">
+                <label>Passkey code (ít nhất 4 ký tự)</label>
+                <input id="passkeyCode" type="password" placeholder="Nhập passkey code">
+              </div>
+            </div>
+            <div id="totpSetupBox" style="display:none;margin-bottom:12px;background:#f8f9ff;border:1px solid #dfe4ff;border-radius:8px;padding:12px;">
+              <p style="font-size:13px;color:#334;margin-bottom:8px;">Bấm thiết lập để tạo secret cho Google Authenticator.</p>
+              <div id="totpSecretText" style="font-family:monospace;font-size:13px;word-break:break-all;color:#111;"></div>
+            </div>
+              <button type="button" class="btn primary" id="setupTwoFactorBtn" style="width: 100%;">🚀 Thiết lập 2 lớp</button>
+            </div>
+
+            <form id="twoFactorForm" style="display: none;">
+              <p id="twoFactorFormHint" style="font-size: 13px; color: #666; margin-bottom: 16px;">Bước 2: Nhập mã xác minh để hoàn tất cấu hình.</p>
+              <div class="form-group" id="twoFactorVerifyChannelGroup" style="margin-bottom: 12px;">
+                <label>Kênh dùng để xác minh</label>
+                <select id="twoFactorVerifyChannel">
+                  <option value="email">📧 Email</option>
+                  <option value="sms">📱 SMS</option>
+                  <option value="passkey">🔑 Passkey code</option>
+                  <option value="totp">🧮 Google Authenticator</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <input id="twoFactorCode" type="text" placeholder="Nhập mã 6 chữ số" maxlength="6" required>
+                <button type="submit" class="btn primary">✓ Xác minh</button>
+              </div>
+              <div class="button-group" style="margin-top: 12px;">
+                <button type="button" class="btn ghost" id="resendTwoFactorBtn">↻ Gửi lại mã</button>
+                <button type="button" class="btn secondary" id="cancelTwoFactorBtn">Hủy</button>
+              </div>
+            </form>
+
+            <div id="twoFactorManageBox" class="twofa-manage" style="display:none;">
+              <p>Đang bật xác minh 2 bước. Bạn có thể đổi phương thức chính hoặc tắt 2FA nếu cần.</p>
+              <div id="enabledTwoFactorMethodsList" style="display:grid;gap:8px;margin-bottom:10px;"></div>
+              <button type="button" class="btn secondary" id="disableTwoFactorBtn" style="width:100%;color:#b42318;border-color:#f3b8b8;background:#fff;">Tắt xác minh 2 lớp</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Sessions Card -->
+        <div class="account-card">
+          <div class="card-title">
+            <span class="card-title-icon">💻</span>
+            <span>Phiên hoạt động</span>
+          </div>
+          <div style="font-size: 14px; color: #666; margin-bottom: 16px;">
+            <p>✓ Phiên hiện tại trên trình duyệt này</p>
+            <p style="margin-top: 8px; color: #999; font-size: 12px;">Để đăng xuất khỏi các thiết bị khác, hãy đổi mật khẩu.</p>
+          </div>
+          <button class="btn secondary" id="logoutAllBtn" style="width: 100%;">🚪 Đăng xuất khỏi tất cả</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preferences Section -->
+    <div id="preferencesSection" class="section-content" style="display: none;">
+      <div class="account-grid">
+        <!-- Notification Preferences Card -->
+        <div class="account-card">
+          <div class="card-title">
+            <span class="card-title-icon">🔔</span>
+            <span>Thông báo</span>
+          </div>
+          <div class="CheckBoxWrapper">
+            <input type="checkbox" id="emailNotifications" checked>
+            <label for="emailNotifications">Nhận email thông báo</label>
+          </div>
+          <div class="CheckBoxWrapper">
+            <input type="checkbox" id="smsNotifications" checked>
+            <label for="smsNotifications">Nhận thông báo SMS</label>
+          </div>
+          <div class="CheckBoxWrapper">
+            <input type="checkbox" id="bookingNotifications" checked>
+            <label for="bookingNotifications">Thông báo về vé đặt</label>
+          </div>
+          <div class="CheckBoxWrapper">
+            <input type="checkbox" id="promoBNotifications">
+            <label for="promoBNotifications">Thông báo khuyến mãi</label>
+          </div>
+          <button class="btn primary" id="saveNotificationsBtn" style="width: 100%; margin-top: 20px;">💾 Lưu tùy chọn</button>
+        </div>
+
+        <!-- Account Settings Card -->
+        <div class="account-card">
+          <div class="card-title">
+            <span class="card-title-icon">⚙️</span>
+            <span>Cài đặt tài khoản</span>
+          </div>
+          <div style="font-size: 14px; color: #666; margin-bottom: 20px; padding: 16px; background: #f9f9f9; border-radius: 8px;">
+            <p><strong>Tài khoản đã tạo:</strong> <span id="accountCreatedDate">-</span></p>
+            <p style="margin-top: 8px;"><strong>Lần đăng nhập cuối:</strong> <span id="lastLoginDate">-</span></p>
+          </div>
+          <button class="btn secondary" id="deleteAccountBtn" style="width: 100%; color: #d32f2f;">🗑️ Xóa tài khoản</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-nav">
+      <a href="/">← Về trang chủ</a>
+      <a href="/tickets.html">Vé của tôi →</a>
+      <a href="#" id="logoutLink">Đăng xuất</a>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('auth_token');
+    if (!token) { location.href = '/auth.html'; }
+
+    let currentSection = 'profile';
+
+    async function api(path, options = {}) {
+      const headers = Object.assign({'Authorization': `Bearer ${token}`}, options.headers || {});
+      if (options.body && !headers['Content-Type']) {
+        headers['Content-Type'] = 'application/json';
+      }
+      const res = await fetch(path, Object.assign({}, options, { headers }));
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+        location.href = '/auth.html?reason=expired';
+        throw new Error('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
+      }
+      if (!res.ok) {
+        throw new Error(data.detail || 'Yêu cầu thất bại');
+      }
+      return data;
+    }
+
+    function showAlert(message, type = 'success') {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.innerHTML = `<div class="alert ${type}">${message}</div>`;
+      setTimeout(() => { alertBox.innerHTML = ''; }, 3000);
+    }
+
+    let pendingTwoFactorChannel = null;
+    let activeTwoFactorChannels = [];
+    let pendingTwoFactorAction = null;
+
+    const channelLabelMap = {
+      sms: '📱 SMS',
+      email: '📧 Email',
+      passkey: '🔑 Passkey code',
+      totp: '🧮 Google Authenticator'
+    };
+
+    function applyTwoFactorChannelUi(channel) {
+      const select = document.getElementById('twoFactorChannel');
+      const normalized = channel || 'email';
+      select.value = normalized;
+      document.querySelectorAll('.twofa-method').forEach((button) => {
+        button.classList.toggle('active', button.dataset.channel === normalized);
+      });
+      document.getElementById('passkeySetupBox').style.display = normalized === 'passkey' ? 'block' : 'none';
+      document.getElementById('totpSetupBox').style.display = normalized === 'totp' ? 'block' : 'none';
+    }
+
+    function applyVerifyInputMode(channel) {
+      const input = document.getElementById('twoFactorCode');
+      const normalized = (channel || '').toLowerCase();
+      if (normalized === 'passkey') {
+        input.type = 'password';
+        input.maxLength = 32;
+        input.placeholder = 'Nhập passkey code';
+      } else {
+        input.type = 'text';
+        input.maxLength = 6;
+        input.placeholder = normalized === 'totp' ? 'Nhập mã Google Authenticator' : 'Nhập mã 6 chữ số';
+      }
+    }
+
+    function renderEnabledMethods(actionsEnabled = true) {
+      const holder = document.getElementById('enabledTwoFactorMethodsList');
+      if (!holder) {
+        return;
+      }
+      if (!activeTwoFactorChannels.length) {
+        holder.innerHTML = '<div style="font-size:12px;color:#8f3a3a;">Chưa có phương thức nào trong danh sách.</div>';
+        return;
+      }
+      holder.innerHTML = activeTwoFactorChannels.map(channel => {
+        const label = channelLabelMap[channel] || channel;
+        const removeDisabled = !actionsEnabled || activeTwoFactorChannels.length === 1;
+        return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:1px solid #f1c8c8;border-radius:8px;padding:8px 10px;">
+          <span style="font-size:12px;font-weight:600;color:#7a2a2a;">${label}</span>
+          <button type="button" class="btn secondary remove-twofa-method-btn" data-channel="${channel}" ${removeDisabled ? 'disabled' : ''} style="padding:6px 10px;font-size:12px;">Xóa</button>
+        </div>`;
+      }).join('');
+
+      holder.querySelectorAll('.remove-twofa-method-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          beginTwoFactorAction('remove', btn.dataset.channel);
+        });
+      });
+    }
+
+    async function requestVerificationCode(channel) {
+      if (channel === 'totp' || channel === 'passkey') {
+        return;
+      }
+      await api('/auth/2fa/request', {
+        method: 'POST',
+        body: JSON.stringify({ channel })
+      });
+    }
+
+    async function beginTwoFactorAction(action, targetChannel = null) {
+      const verifyChannelSelect = document.getElementById('twoFactorVerifyChannel');
+      const selectedVerifyChannel = verifyChannelSelect.value || pendingTwoFactorChannel || document.getElementById('twoFactorChannel').value;
+      pendingTwoFactorAction = { action, targetChannel, verifyChannel: selectedVerifyChannel };
+      document.getElementById('twoFactorDisabledForm').style.display = 'none';
+      document.getElementById('twoFactorForm').style.display = 'block';
+      document.getElementById('twoFactorCode').value = '';
+      applyVerifyInputMode(selectedVerifyChannel);
+
+      if (action === 'disable') {
+        document.getElementById('twoFactorFormHint').textContent = 'Xác minh lần cuối để tắt 2FA.';
+      } else if (action === 'remove') {
+        document.getElementById('twoFactorFormHint').textContent = `Xác minh để xóa phương thức ${channelLabelMap[targetChannel] || targetChannel}.`;
+      } else {
+        document.getElementById('twoFactorFormHint').textContent = 'Bước 2: Nhập mã xác minh để hoàn tất cấu hình.';
+      }
+
+      await requestVerificationCode(selectedVerifyChannel);
+    }
+
+    function renderProfile(user) {
+      const avatar = (user.fullName || user.username || 'U')[0].toUpperCase();
+      document.getElementById('avatarDisplay').textContent = avatar;
+      document.getElementById('headerName').textContent = user.fullName || user.username || 'Người dùng';
+      document.getElementById('headerUsername').textContent = `@${user.username}`;
+
+      document.getElementById('profileDisplay').innerHTML = `
+        <div class="profile-item"><label>Họ tên</label><value>${user.fullName || '-'}</value></div>
+        <div class="profile-item"><label>Tên đăng nhập</label><value>@${user.username}</value></div>
+        <div class="profile-item"><label>Email</label><value>${user.email || 'Chưa cập nhật'}</value></div>
+        <div class="profile-item"><label>SĐT</label><value>${user.phone || 'Chưa cập nhật'}</value></div>
+      `;
+
+      activeTwoFactorChannels = Array.isArray(user.twoFactorChannels)
+        ? user.twoFactorChannels.slice()
+        : [];
+      const enabledChannels = Array.isArray(user.enabledTwoFactorChannels)
+        ? user.enabledTwoFactorChannels
+        : [];
+
+      document.getElementById('twoFactorStatusValue').textContent = user.twoFactorEnabled ? '✓ Đã bật' : '✗ Chưa bật';
+      document.getElementById('twoFactorStatusValue').className = `status-badge ${user.twoFactorEnabled ? 'active' : 'inactive'}`;
+      document.getElementById('twoFactorChannelValue').textContent = enabledChannels.length > 0
+        ? enabledChannels.map(ch => channelLabelMap[ch] || ch).join(' • ')
+        : (channelLabelMap[user.twoFactorChannel] || '📧 Email');
+
+      document.getElementById('fullName').value = user.fullName || '';
+      document.getElementById('email').value = user.email || '';
+      document.getElementById('phone').value = user.phone || '';
+      applyTwoFactorChannelUi(user.twoFactorChannel || 'email');
+
+      document.getElementById('setupTwoFactorBtn').textContent = user.twoFactorEnabled
+        ? '🔁 Cập nhật phương thức 2 lớp'
+        : '🚀 Thiết lập 2 lớp';
+      document.getElementById('twoFactorManageBox').style.display = user.twoFactorEnabled ? 'block' : 'none';
+      document.getElementById('twoFactorDisabledForm').style.display = 'block';
+      document.getElementById('twoFactorForm').style.display = 'none';
+      document.getElementById('twoFactorCode').value = '';
+      pendingTwoFactorChannel = null;
+      pendingTwoFactorAction = null;
+      document.getElementById('twoFactorVerifyChannel').value = user.twoFactorChannel || 'email';
+      applyVerifyInputMode(user.twoFactorChannel || 'email');
+      renderEnabledMethods(user.twoFactorEnabled);
+    }
+
+    async function loadProfile() {
+      try {
+        const user = await api('/auth/me');
+        renderProfile(user);
+      } catch (err) {
+        showAlert(err.message, 'error');
+        if (err.message.includes('401')) location.href = '/auth.html';
+      }
+    }
+
+    // Navigation
+    document.querySelectorAll('.nav-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.section-content').forEach(s => s.style.display = 'none');
+        btn.classList.add('active');
+        currentSection = btn.dataset.section;
+        document.getElementById(currentSection + 'Section').style.display = 'block';
+      });
+    });
+
+    // Profile Form
+    document.getElementById('editProfileBtn').addEventListener('click', () => {
+      document.getElementById('profileDisplay').parentElement.style.display = 'none';
+      document.getElementById('editProfileCard').style.display = 'block';
+    });
+
+    document.getElementById('cancelEditBtn').addEventListener('click', () => {
+      document.getElementById('profileDisplay').parentElement.style.display = 'block';
+      document.getElementById('editProfileCard').style.display = 'none';
+    });
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const payload = {
+          fullName: document.getElementById('fullName').value,
+          email: document.getElementById('email').value,
+          phone: document.getElementById('phone').value
+        };
+        const user = await api('/auth/me', { method: 'PUT', body: JSON.stringify(payload) });
+        localStorage.setItem('auth_user', JSON.stringify(user));
+        renderProfile(user);
+        document.getElementById('profileDisplay').parentElement.style.display = 'block';
+        document.getElementById('editProfileCard').style.display = 'none';
+        showAlert('✓ Cập nhật thông tin thành công');
+      } catch (err) {
+        showAlert(err.message, 'error');
+      }
+    });
+
+    // Password Form
+    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const newPwd = document.getElementById('newPassword').value;
+      const confirmPwd = document.getElementById('confirmPassword').value;
+      
+      if (newPwd !== confirmPwd) {
+        showAlert('Mật khẩu không khớp', 'error');
+        return;
+      }
+
+      try {
+        await api('/auth/password/change', {
+          method: 'POST',
+          body: JSON.stringify({
+            currentPassword: document.getElementById('currentPassword').value,
+            newPassword: newPwd
+          })
+        });
+        e.target.reset();
+        showAlert('✓ Đã đổi mật khẩu thành công');
+      } catch (err) {
+        showAlert(err.message, 'error');
+      }
+    });
+
+    // Two-Factor Setup
+    document.querySelectorAll('.twofa-method').forEach((button) => {
+      button.addEventListener('click', () => {
+        applyTwoFactorChannelUi(button.dataset.channel);
+      });
+    });
+
+    document.getElementById('setupTwoFactorBtn').addEventListener('click', async () => {
+      try {
+        const selectedChannel = document.getElementById('twoFactorChannel').value;
+        const mergedChannels = Array.from(new Set([...(activeTwoFactorChannels || []), selectedChannel]));
+        await api('/auth/me', {
+          method: 'PUT',
+          body: JSON.stringify({
+            twoFactorChannel: selectedChannel,
+            twoFactorChannels: mergedChannels
+          })
+        });
+
+        pendingTwoFactorChannel = selectedChannel;
+        pendingTwoFactorAction = { action: 'enable', targetChannel: selectedChannel, verifyChannel: selectedChannel };
+
+        if (selectedChannel === 'passkey') {
+          const passkeyCode = document.getElementById('passkeyCode').value.trim();
+          if (!passkeyCode || passkeyCode.length < 4) {
+            showAlert('Passkey code phải có ít nhất 4 ký tự', 'error');
+            return;
+          }
+          await api('/auth/2fa/setup/passkey', {
+            method: 'POST',
+            body: JSON.stringify({ passkeyCode })
+          });
+          document.getElementById('twoFactorDisabledForm').style.display = 'none';
+          document.getElementById('twoFactorForm').style.display = 'block';
+          document.getElementById('twoFactorVerifyChannel').value = selectedChannel;
+          applyVerifyInputMode(selectedChannel);
+          document.getElementById('twoFactorFormHint').textContent = 'Bước 2: Nhập lại passkey code để xác minh và bật 2 lớp.';
+          document.getElementById('twoFactorCode').setAttribute('maxlength', '32');
+          document.getElementById('twoFactorCode').setAttribute('placeholder', 'Nhập passkey code');
+          showAlert('✓ Passkey code đã được thiết lập. Nhập lại để xác minh bật 2FA');
+          return;
+        }
+
+        if (selectedChannel === 'totp') {
+          const setupResult = await api('/auth/2fa/setup/totp', { method: 'POST' });
+          document.getElementById('totpSetupBox').style.display = 'block';
+          document.getElementById('totpSecretText').textContent = `Secret: ${setupResult.secret}`;
+          document.getElementById('twoFactorDisabledForm').style.display = 'none';
+          document.getElementById('twoFactorForm').style.display = 'block';
+          document.getElementById('twoFactorVerifyChannel').value = selectedChannel;
+          applyVerifyInputMode(selectedChannel);
+          document.getElementById('twoFactorFormHint').textContent = 'Bước 2: Mở Google Authenticator, nhập mã 6 số hiện tại để xác minh.';
+          document.getElementById('twoFactorCode').setAttribute('maxlength', '6');
+          document.getElementById('twoFactorCode').setAttribute('placeholder', 'Nhập mã Google Authenticator');
+          showAlert('✓ Đã tạo secret Google Authenticator, nhập mã 6 số để xác minh');
+          return;
+        }
+
+        await requestVerificationCode(selectedChannel);
+        document.getElementById('twoFactorDisabledForm').style.display = 'none';
+        document.getElementById('twoFactorForm').style.display = 'block';
+        document.getElementById('twoFactorVerifyChannel').value = selectedChannel;
+        applyVerifyInputMode(selectedChannel);
+        document.getElementById('twoFactorFormHint').textContent = `Bước 2: Nhập mã vừa gửi qua ${channelLabelMap[selectedChannel] || 'kênh đã chọn'} để xác minh.`;
+        showAlert('✓ Mã xác minh đã được gửi');
+      } catch (err) {
+        showAlert(err.message, 'error');
+      }
+    });
+
+    document.getElementById('twoFactorForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const verifyChannel = document.getElementById('twoFactorVerifyChannel').value;
+        const code = document.getElementById('twoFactorCode').value;
+        const action = pendingTwoFactorAction?.action || 'enable';
+
+        let result;
+        if (action === 'disable') {
+          result = await api('/auth/2fa/disable', {
+            method: 'POST',
+            body: JSON.stringify({ code, channel: verifyChannel })
+          });
+        } else if (action === 'remove') {
+          result = await api('/auth/2fa/method/remove', {
+            method: 'POST',
+            body: JSON.stringify({
+              code,
+              channel: verifyChannel,
+              removeChannel: pendingTwoFactorAction?.targetChannel
+            })
+          });
+        } else {
+          result = await api('/auth/2fa/verify', {
+            method: 'POST',
+            body: JSON.stringify({
+              code,
+              channel: pendingTwoFactorChannel || verifyChannel
+            })
+          });
+        }
+
+        localStorage.setItem('auth_user', JSON.stringify(result.user));
+        renderProfile(result.user);
+        if (action === 'disable') {
+          showAlert('✓ Đã tắt xác thực 2 lớp');
+        } else if (action === 'remove') {
+          showAlert('✓ Đã xóa phương thức 2FA');
+        } else {
+          showAlert('✓ Cập nhật xác thực 2 lớp thành công');
+        }
+      } catch (err) {
+        showAlert(err.message, 'error');
+      }
+    });
+
+    document.getElementById('cancelTwoFactorBtn').addEventListener('click', () => {
+      document.getElementById('twoFactorForm').style.display = 'none';
+      document.getElementById('twoFactorDisabledForm').style.display = 'block';
+      pendingTwoFactorChannel = null;
+      pendingTwoFactorAction = null;
+    });
+
+    document.getElementById('resendTwoFactorBtn').addEventListener('click', async () => {
+      try {
+        const channel = pendingTwoFactorChannel || document.getElementById('twoFactorChannel').value;
+        const verifyChannel = document.getElementById('twoFactorVerifyChannel').value || channel;
+        if (verifyChannel === 'totp') {
+          showAlert('Google Authenticator tự tạo mã mới mỗi 30 giây, không cần gửi lại.', 'success');
+          return;
+        }
+        if (verifyChannel === 'passkey') {
+          showAlert('Passkey code là mã bạn đã tạo, hãy nhập lại để xác minh.', 'success');
+          return;
+        }
+        await requestVerificationCode(verifyChannel);
+        showAlert('✓ Đã gửi lại mã xác minh');
+      } catch (err) {
+        showAlert(err.message, 'error');
+      }
+    });
+
+    document.getElementById('enableAllTwoFactorMethodsBtn').addEventListener('click', async () => {
+      try {
+        const selectedChannel = document.getElementById('twoFactorChannel').value || 'email';
+        const allChannels = ['email', 'sms', 'passkey', 'totp'];
+        const user = await api('/auth/me', {
+          method: 'PUT',
+          body: JSON.stringify({
+            twoFactorChannel: selectedChannel,
+            twoFactorChannels: allChannels
+          })
+        });
+        localStorage.setItem('auth_user', JSON.stringify(user));
+        renderProfile(user);
+        showAlert('✓ Đã cập nhật danh sách phương thức 2FA');
+      } catch (err) {
+        showAlert(err.message, 'error');
+      }
+    });
+
+    document.getElementById('disableTwoFactorBtn').addEventListener('click', async () => {
+      if (!confirm('Bạn có chắc muốn tắt xác thực 2 lớp?')) {
+        return;
+      }
+      try {
+        await beginTwoFactorAction('disable');
+      } catch (err) {
+        showAlert(err.message, 'error');
+      }
+    });
+
+    document.getElementById('twoFactorVerifyChannel').addEventListener('change', async (e) => {
+      applyVerifyInputMode(e.target.value);
+      if (pendingTwoFactorAction) {
+        pendingTwoFactorAction.verifyChannel = e.target.value;
+        try {
+          await requestVerificationCode(e.target.value);
+        } catch (err) {
+          showAlert(err.message, 'error');
+        }
+      }
+    });
+
+    // Logout
+    document.getElementById('logoutLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      location.href = '/auth.html';
+    });
+
+    document.getElementById('logoutAllBtn').addEventListener('click', () => {
+      if (confirm('Đăng xuất khỏi tất cả các thiết bị? Bạn sẽ cần đăng nhập lại.')) {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+        location.href = '/auth.html';
+      }
+    });
+
+    // Notifications
+    document.getElementById('saveNotificationsBtn').addEventListener('click', () => {
+      showAlert('✓ Lưu tùy chọn thành công');
+    });
+
+    // Delete Account
+    document.getElementById('deleteAccountBtn').addEventListener('click', () => {
+      if (confirm('Bạn chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác.')) {
+        alert('Tính năng xóa tài khoản đang được phát triển');
+      }
+    });
+
+    // Initialize
+    loadProfile();
+  </script>
+</body>
+</html>

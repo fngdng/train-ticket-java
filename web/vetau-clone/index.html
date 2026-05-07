@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Vé Tàu — Clone (inspired)</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="logo">VÉ TÀU</div>
+      <nav class="top-nav">
+        <a href="#home">Trang chủ</a>
+        <a href="#news">Tin tức</a>
+        <a href="/admin-login.html">Admin 🛡️</a>
+        <a href="#contact">Liên hệ</a>
+        <div id="authArea" class="auth-widget"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+            <div class="search-card">
+          <h1>Tìm chuyến tàu</h1>
+              <form id="searchForm">
+            <div class="row">
+              <label>Nơi đi
+                <input id="from" placeholder="Ga đi (ví dụ: Hà Nội)" required>
+              </label>
+              <label>Nơi đến
+                <input id="to" placeholder="Ga đến (ví dụ: Sài Gòn)" required>
+              </label>
+            </div>
+            <div class="row">
+              <label>Ngày đi
+                <input id="date" type="date" required>
+              </label>
+              <label>Loại vé
+                <select id="tripType"><option value="one">Một chiều</option><option value="round">Khứ hồi</option></select>
+              </label>
+            </div>
+            <div class="row actions">
+              <button type="submit" class="btn primary">Tìm chuyến</button>
+              <button type="button" class="btn ghost" id="sampleBtn">Dùng dữ liệu mẫu</button>
+              <a class="btn ghost" href="/auth.html" style="text-decoration:none;display:inline-flex;align-items:center">Đăng nhập / Đăng ký</a>
+              <a class="btn ghost" href="/account.html" style="text-decoration:none;display:inline-flex;align-items:center">Tài khoản</a>
+              <a class="btn ghost" href="/tickets.html" style="text-decoration:none;display:inline-flex;align-items:center">Vé của tôi</a>
+              <a class="btn ghost" href="/scan.html" style="text-decoration:none;display:inline-flex;align-items:center">Scan QR</a>
+            </div>
+          </form>
+        </div>
+
+        <div class="banners">
+          <img src="https://vetauduongsat.vn/uploads/banners/2.jpg" alt="banner1">
+          <img src="https://vetauduongsat.vn/uploads/banners/2_3.jpg" alt="banner2">
+        </div>
+      </div>
+    </section>
+
+    <section class="results container" id="results">
+      <h2>Kết quả tìm chuyến</h2>
+      <div id="trips" class="trips-grid">
+        <!-- Trip cards injected here -->
+      </div>
+    </section>
+      <section class="quick-routes">
+        <div class="quick-routes-head">
+          <div>
+            <p class="section-kicker">Chon nhanh</p>
+            <h2>Chuyen tau san de mua ngay</h2>
+          </div>
+          <button class="btn ghost" id="sampleBtn" type="button">Tai lai danh sach</button>
+        </div>
+        <div class="quick-route-grid">
+          <button class="quick-route-card" type="button" onclick="choose(this)" data-name="SE1" data-from="Hanoi" data-to="Ho Chi Minh" data-departure="06:00" data-arrival="18:45" data-price="980000">
+            <span class="quick-route-badge">Pho bien</span>
+            <strong>SE1</strong>
+            <span>Ha Noi → TP.HCM</span>
+            <small>Khoi hanh 06:00 • Tu 980.000d</small>
+          </button>
+          <button class="quick-route-card" type="button" onclick="choose(this)" data-name="SE3" data-from="Hanoi" data-to="Da Nang" data-departure="08:30" data-arrival="18:10" data-price="680000">
+            <span class="quick-route-badge">Ngan ngay</span>
+            <strong>SE3</strong>
+            <span>Ha Noi → Da Nang</span>
+            <small>Khoi hanh 08:30 • Tu 680.000d</small>
+          </button>
+          <button class="quick-route-card" type="button" onclick="choose(this)" data-name="SE5" data-from="Ho Chi Minh" data-to="Da Nang" data-departure="07:15" data-arrival="19:05" data-price="720000">
+            <span class="quick-route-badge">Thu vien</span>
+            <strong>SE5</strong>
+            <span>TP.HCM → Da Nang</span>
+            <small>Khoi hanh 07:15 • Tu 720.000d</small>
+          </button>
+        </div>
+      </section>
+
+    <section class="news container" id="news">
+      <h2>Tin tức & Khuyến mãi</h2>
+      <ul class="news-list" id="newsList">
+        <!-- News items -->
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2026 Vé Tàu — Bản clone giao diện (inspired).</p>
+      <p>Thay ảnh/logo bằng nội dung hợp lệ nếu cần.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

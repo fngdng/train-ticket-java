@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Vé Tàu — Loading…</title>
+    <meta http-equiv="refresh" content="0;url=/vetau-clone/">
+    <style>body{display:flex;align-items:center;justify-content:center;height:100vh;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;background:#f4f7fb;color:#0b2545}</style>
+  </head>
+  <body>
+    <div>
+      <h2>Đang chuyển hướng tới giao diện mới…</h2>
+      <p>Nếu trình duyệt không tự động chuyển, <a href="/vetau-clone/">bấm vào đây</a>.</p>
+    </div>
+  </body>
+</html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Express Rail — Book Your Journey</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .app { width: 100%; max-width: 500px; }
+    .card { background: white; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); overflow: hidden; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; color: white; text-align: center; }
+    .header h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+    .header p { font-size: 0.9rem; opacity: 0.9; }
+    .content { padding: 2rem; }
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid #e0e0e0; margin-bottom: 1.5rem; }
+    .tab-btn { 
+      flex: 1; padding: 1rem; border: none; background: none; cursor: pointer; 
+      font-size: 1rem; font-weight: 500; color: #666; border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+    }
+    .tab-btn.active { color: #667eea; border-bottom-color: #667eea; }
+    .form-group { margin-bottom: 1.25rem; }
+    label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333; font-size: 0.95rem; }
+    input, select, textarea { 
+      width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; 
+      font-size: 1rem; font-family: inherit; transition: border 0.3s;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+    button { 
+      width: 100%; padding: 0.875rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+      color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3); }
+    .msg { 
+      padding: 1rem; margin-top: 1rem; border-radius: 6px; font-size: 0.95rem; 
+      animation: slideIn 0.3s ease;
+    }
+    .msg.error { background: #fee; color: #c33; border-left: 4px solid #c33; }
+    .msg.success { background: #efe; color: #3c3; border-left: 4px solid #3c3; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .auth-info { 
+      background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); 
+      padding: 1.25rem; border-radius: 8px; text-align: center; margin-bottom: 1rem;
+    }
+    .auth-info .user-name { font-size: 1.25rem; font-weight: 700; color: #667eea; margin-bottom: 0.5rem; }
+    .auth-info .token-preview { 
+      background: white; padding: 0.75rem; border-radius: 6px; 
+      font-family: monospace; font-size: 0.8rem; color: #666; word-break: break-all; 
+      max-height: 80px; overflow-y: auto; border: 1px solid #ddd; 
+    }
+    .logout-btn { background: #f44; margin-top: 1rem; }
+    .logout-btn:hover { box-shadow: 0 8px 16px rgba(244, 68, 68, 0.3); }
+    .trains-list { max-height: 400px; overflow-y: auto; }
+    .train-card { 
+      background: #f9f9f9; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; 
+      border-left: 4px solid #667eea; cursor: pointer; transition: all 0.3s;
+    }
+    .train-card:hover { background: #f0f0f0; transform: translateX(4px); }
+    .train-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+    .train-name { font-weight: 700; color: #333; }
+    .train-price { font-weight: 700; color: #667eea; }
+    .train-time { font-size: 0.9rem; color: #666; display: flex; gap: 1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .header h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const e = React.createElement;
+function App(){
+  const [tab, setTab] = React.useState('login');
+  const [username, setUsername] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [fullName, setFullName] = React.useState('');
+  const [token, setToken] = React.useState(null);
+  const [msg, setMsg] = React.useState('');
+  const [msgType, setMsgType] = React.useState('');
+  const [from, setFrom] = React.useState('');
+  const [to, setTo] = React.useState('');
+  const [date, setDate] = React.useState('');
+  const [trains, setTrains] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+
+  async function login(){
+    setMsg('');
+    try{
+      const res = await fetch('/auth/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({username, password})
+      });
+      const body = await res.json();
+      if(!res.ok){ setMsgType('error'); setMsg(body.detail || 'Login failed'); return; }
+      setToken(body.token);
+      setMsgType('success');
+      setMsg('✓ Welcome back!');
+      setUsername(''); setPassword('');
+    }catch(err){ setMsgType('error'); setMsg('Network error: ' + err.message); }
+  }
+
+  async function register(){
+    setMsg('');
+    if(!username || !password || !fullName){
+      setMsgType('error'); setMsg('All fields required'); return;
+    }
+    try{
+      const res = await fetch('/auth/register', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({username, password, fullName})
+      });
+      const body = await res.json();
+      if(!res.ok){ setMsgType('error'); setMsg(body.detail || 'Registration failed'); return; }
+      setToken(body.token);
+      setMsgType('success');
+      setMsg('✓ Account created! Welcome aboard.');
+      setUsername(''); setPassword(''); setFullName('');
+    }catch(err){ setMsgType('error'); setMsg('Network error: ' + err.message); }
+  }
+
+  async function searchTrains(){
+    setMsg('');
+    if(!from || !to){ setMsgType('error'); setMsg('Select departure and destination'); return; }
+    setLoading(true);
+    try{
+      const res = await fetch(`/trains/search?from=${from}&to=${to}&date=${date}`, {
+        method:'GET', headers:{'Authorization':'Bearer '+token}
+      });
+      const body = await res.json();
+      if(!res.ok){ setMsgType('error'); setMsg(body.detail || 'Search failed'); return; }
+      setTrains(body || []);
+      setMsgType('success');
+      setMsg(body.length ? `Found ${body.length} trains` : 'No trains available');
+    }catch(err){ setMsgType('error'); setMsg('Search error: ' + err.message); }
+    setLoading(false);
+  }
+
+  return e('div', {className:'app'},
+    e('div', {className:'card'},
+      e('div', {className:'header'}, 
+        e('h1', null, '🚂 Express Rail'),
+        e('p', null, 'Book your train journey')
+      ),
+      e('div', {className:'content'},
+        !token ? e('div', null,
+          e('div', {className:'tabs'},
+            e('button', {className:tab==='login'?'tab-btn active':'tab-btn', onClick:()=>{setTab('login'); setMsg('');}}, '📝 Login'),
+            e('button', {className:tab==='register'?'tab-btn active':'tab-btn', onClick:()=>{setTab('register'); setMsg('');}}, '✨ Register')
+          ),
+          tab === 'login' ? e('div', null,
+            e('div', {className:'form-group'},
+              e('label', null, 'Username'),
+              e('input', {value:username, onChange:e=>setUsername(e.target.value), placeholder:'Enter your username'})
+            ),
+            e('div', {className:'form-group'},
+              e('label', null, 'Password'),
+              e('input', {type:'password', value:password, onChange:e=>setPassword(e.target.value), placeholder:'Enter password'})
+            ),
+            e('button', {onClick:login}, 'Login')
+          ) : e('div', null,
+            e('div', {className:'form-group'},
+              e('label', null, 'Full Name'),
+              e('input', {value:fullName, onChange:e=>setFullName(e.target.value), placeholder:'Your full name'})
+            ),
+            e('div', {className:'form-group'},
+              e('label', null, 'Username'),
+              e('input', {value:username, onChange:e=>setUsername(e.target.value), placeholder:'Choose a username'})
+            ),
+            e('div', {className:'form-group'},
+              e('label', null, 'Password'),
+              e('input', {type:'password', value:password, onChange:e=>setPassword(e.target.value), placeholder:'Create a password'})
+            ),
+            e('button', {onClick:register}, 'Create Account')
+          ),
+          msg ? e('div', {className:'msg '+msgType}, msg) : null
+        ) : e('div', null,
+          e('div', {className:'auth-info'},
+            e('div', {className:'user-name'}, fullName || username || 'Welcome'),
+            e('div', {className:'token-preview'}, 'JWT: '+token.substring(0,40)+'...')
+          ),
+          e('div', {className:'form-group'},
+            e('label', null, '📍 Departure'),
+            e('select', {value:from, onChange:e=>setFrom(e.target.value)},
+              e('option', {value:''}, 'Select city'),
+              e('option', {value:'HN'}, 'Hanoi'),
+              e('option', {value:'HCM'}, 'Ho Chi Minh'),
+              e('option', {value:'DN'}, 'Da Nang'),
+              e('option', {value:'HP'}, 'Hai Phong')
+            )
+          ),
+          e('div', {className:'form-group'},
+            e('label', null, '📍 Destination'),
+            e('select', {value:to, onChange:e=>setTo(e.target.value)},
+              e('option', {value:''}, 'Select city'),
+              e('option', {value:'HN'}, 'Hanoi'),
+              e('option', {value:'HCM'}, 'Ho Chi Minh'),
+              e('option', {value:'DN'}, 'Da Nang'),
+              e('option', {value:'HP'}, 'Hai Phong')
+            )
+          ),
+          e('div', {className:'form-group'},
+            e('label', null, '📅 Date'),
+            e('input', {type:'date', value:date, onChange:e=>setDate(e.target.value)})
+          ),
+          e('button', {onClick:searchTrains, disabled:loading}, loading ? 'Searching...' : 'Search Trains'),
+          trains.length > 0 ? e('div', {className:'trains-list'},
+            e('h3', {style:{margin:'1rem 0 0.5rem'}}, '🚂 Available Trains'),
+            trains.map((train, i) => e('div', {key:i, className:'train-card'},
+              e('div', {className:'train-header'},
+                e('div', {className:'train-name'}, train.name || 'Train ' + (i+1)),
+                e('div', {className:'train-price'}, '💰 ₫' + (train.price || 500000).toLocaleString())
+              ),
+              e('div', {className:'train-time'}, 
+                e('span', null, '⏱ ' + (train.departure || '12:00')),
+                e('span', null, '⏲ ' + (train.arrival || '18:00'))
+              )
+            ))
+          ) : null,
+          msg ? e('div', {className:'msg '+msgType}, msg) : null,
+          e('button', {className:'logout-btn', onClick:()=>{setToken(null); setFullName(''); setUsername('');}}, 'Logout')
+        )
+      )
+    )
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(e(App));
+</script>
+</body>
+</html>

@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Quet QR ve tau</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: radial-gradient(circle at top right, #d9f3ff 0%, #edf0ff 45%, #f9fbff 100%);
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 1020px;
+      margin: 0 auto;
+      padding: 24px 16px 42px;
+    }
+    .hero {
+      background: linear-gradient(135deg, #2146ea 0%, #01a8cd 100%);
+      color: #fff;
+      border-radius: 16px;
+      padding: 24px 22px;
+      box-shadow: 0 14px 34px rgba(31, 76, 196, 0.25);
+      margin-bottom: 16px;
+    }
+    .hero h1 { margin: 0 0 8px; font-size: 28px; }
+    .hero p { margin: 0; opacity: 0.95; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    .panel {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(15, 40, 110, 0.08);
+      padding: 16px;
+    }
+    .panel h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+    .camera-frame {
+      position: relative;
+      width: 100%;
+      background: #0c1330;
+      border-radius: 12px;
+      overflow: hidden;
+      min-height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    video {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .overlay {
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .scan-box {
+      width: min(58vw, 260px);
+      aspect-ratio: 1;
+      border: 3px solid rgba(0, 255, 170, 0.9);
+      border-radius: 14px;
+      box-shadow: 0 0 0 9999px rgba(5, 10, 30, 0.32);
+    }
+    .row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .camera-select {
+      min-width: 220px;
+      border: 1px solid #d7deff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #fff;
+      color: #1a1a1a;
+    }
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 13px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .btn.primary { background: #2146ea; color: #fff; }
+    .btn.ghost { background: #eef2ff; color: #2947cd; }
+    .btn.stop { background: #ffecec; color: #b51d1d; }
+    .status {
+      margin-top: 10px;
+      font-size: 13px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #edf2ff;
+      color: #2441ad;
+    }
+    .status.error { background: #fde8e8; color: #8c1f1f; }
+    .status.ok { background: #e7f7ea; color: #1d7335; }
+    .hint {
+      margin-top: 8px;
+      color: #5b6780;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .upload-box {
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px dashed #c8d7ff;
+      border-radius: 12px;
+      background: #f8faff;
+    }
+    .upload-box label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #2441ad;
+    }
+    .upload-box input[type="file"] {
+      display: block;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    .diagnostic-box {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #eef4ff;
+      border: 1px solid #d7e3ff;
+    }
+    .diagnostic-box h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: #2441ad;
+    }
+    .diagnostic-box pre {
+      margin: 10px 0 0;
+      min-height: 88px;
+      max-height: 220px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 96px;
+      border: 1px solid #d7deff;
+      border-radius: 10px;
+      padding: 10px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+    }
+    pre {
+      white-space: pre-wrap;
+      background: #0f172a;
+      color: #d9e2ff;
+      border-radius: 10px;
+      padding: 10px;
+      min-height: 120px;
+      font-size: 12px;
+      overflow-x: auto;
+    }
+    .nav a {
+      color: #2146ea;
+      text-decoration: none;
+      font-weight: 600;
+      margin-right: 12px;
+      font-size: 14px;
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 24px; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Scan QR ve ngay tren web</h1>
+      <p>Mo camera, quet QR tren ve, he thong se tu dong xac minh token.</p>
+    </div>
+
+    <div class="grid">
+      <section class="panel">
+        <h2>Camera scan</h2>
+        <div class="camera-frame">
+          <video id="video" autoplay muted playsinline></video>
+          <div class="overlay"><div class="scan-box"></div></div>
+        </div>
+        <div class="row">
+          <select id="cameraSelect" class="camera-select" aria-label="Chon camera">
+            <option value="">Camera mac dinh</option>
+          </select>
+          <button id="startBtn" class="btn primary" type="button">Bat camera</button>
+          <button id="stopBtn" class="btn stop" type="button">Dung camera</button>
+          <button id="verifyBtn" class="btn ghost" type="button">Xac minh token</button>
+        </div>
+        <div id="cameraStatus" class="status">San sang bat camera.</div>
+        <div class="hint" id="cameraHint">Neu khong mo duoc camera, dong Zoom/Meet/Camera app va thu lai hoac chon camera khac.</div>
+        <div class="upload-box">
+          <label for="qrImageInput">Hoac tai anh QR len de quet</label>
+          <input id="qrImageInput" type="file" accept="image/*">
+          <div class="hint">Co the chup man hinh ma QR roi tai len, he thong se doc token tu anh.</div>
+        </div>
+        <div class="diagnostic-box">
+          <h3>Chan doan camera</h3>
+          <button id="diagnoseBtn" class="btn ghost" type="button">Kiem tra camera</button>
+          <pre id="cameraDiagnostics">Dang tai thong tin camera...</pre>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <h2>Token da quet</h2>
+        <textarea id="ticketToken" placeholder="Token se hien o day sau khi quet QR"></textarea>
+        <pre id="verifyResult">{}</pre>
+        <div class="nav" style="margin-top: 8px;">
+          <a href="/tickets.html">Ve cua toi</a>
+          <a href="/">Trang chu</a>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const video = document.getElementById('video');
+    const ticketTokenInput = document.getElementById('ticketToken');
+    const verifyResult = document.getElementById('verifyResult');
+    const cameraStatus = document.getElementById('cameraStatus');
+    const cameraSelect = document.getElementById('cameraSelect');
+    const qrImageInput = document.getElementById('qrImageInput');
+    const cameraDiagnostics = document.getElementById('cameraDiagnostics');
+
+    let stream = null;
+    let rafId = null;
+    let availableVideoDevices = [];
+    let lastCameraError = null;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    function setStatus(message, type = '') {
+      cameraStatus.className = 'status' + (type ? ' ' + type : '');
+      cameraStatus.textContent = message;
+    }
+
+    function humanizeCameraError(err) {
+      const name = err && err.name ? err.name : '';
+      const message = err && err.message ? err.message : 'unknown error';
+
+      if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+        return 'Trinh duyet hoac Windows dang chan quyen camera. Hay mo bieu tuong camera tren thanh dia chi, cho phep truy cap, va kiem tra Settings > Privacy & security > Camera.';
+      }
+      if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+        return 'Khong tim thay camera nao tren may nay.';
+      }
+      if (name === 'NotReadableError' || name === 'TrackStartError') {
+        return 'Windows khong khoi dong duoc camera. Thu tat Zoom/Meet/Camera app, rut cam webcam roi cam lai, hoac kiem tra quyen camera trong Windows Settings.';
+      }
+      if (name === 'OverconstrainedError' || name === 'ConstraintNotSatisfiedError') {
+        return 'Camera hien tai khong ho tro cau hinh dang chon. Hay doi camera khac hoac thu che do mac dinh.';
+      }
+      if (!window.isSecureContext) {
+        return 'Trang quet camera can chay tren localhost hoac HTTPS.';
+      }
+      return message;
+    }
+
+    async function getPermissionState() {
+      try {
+        if (!navigator.permissions || !navigator.permissions.query) {
+          return 'unsupported';
+        }
+        const result = await navigator.permissions.query({ name: 'camera' });
+        return result && result.state ? result.state : 'unknown';
+      } catch (_) {
+        return 'unavailable';
+      }
+    }
+
+    async function updateCameraDiagnostics() {
+      const permissionState = await getPermissionState();
+      await refreshCameraOptions();
+
+      const diagnostics = {
+        secureContext: window.isSecureContext,
+        mediaDevicesSupported: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+        permissionState,
+        detectedCameraCount: availableVideoDevices.length,
+        cameras: availableVideoDevices.map((device, index) => ({
+          index: index + 1,
+          label: device.label || 'Camera chua cap quyen',
+          deviceIdPreview: device.deviceId ? device.deviceId.slice(0, 8) : ''
+        })),
+        lastError: lastCameraError ? {
+          name: lastCameraError.name || 'Error',
+          message: lastCameraError.message || String(lastCameraError)
+        } : null,
+        help: 'Neu detectedCameraCount = 0, browser/Windows chua nhin thay webcam. Neu permissionState = denied, hay mo lai quyen camera cho localhost. Neu lastError = NotReadableError, thu rut webcam roi cam lai va tat camera privacy mode cua may.'
+      };
+
+      cameraDiagnostics.textContent = JSON.stringify(diagnostics, null, 2);
+    }
+
+    async function refreshCameraOptions() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        return;
+      }
+
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        availableVideoDevices = devices.filter(device => device.kind === 'videoinput');
+
+        const currentValue = cameraSelect.value;
+        cameraSelect.innerHTML = '<option value="">Camera mac dinh</option>';
+
+        availableVideoDevices.forEach((device, index) => {
+          const option = document.createElement('option');
+          option.value = device.deviceId;
+          option.textContent = device.label || `Camera ${index + 1}`;
+          cameraSelect.appendChild(option);
+        });
+
+        if (availableVideoDevices.some(device => device.deviceId === currentValue)) {
+          cameraSelect.value = currentValue;
+        }
+      } catch (_) {
+        // Ignore enumerate errors and keep the default option.
+      }
+    }
+
+    async function openCameraStream() {
+      const selectedDeviceId = cameraSelect.value;
+      const attempts = [];
+
+      if (selectedDeviceId) {
+        attempts.push({
+          video: { deviceId: { exact: selectedDeviceId } },
+          audio: false
+        });
+      }
+
+      attempts.push(
+        {
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        },
+        {
+          video: true,
+          audio: false
+        }
+      );
+
+      let lastError = null;
+      for (const constraints of attempts) {
+        try {
+          return await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (err) {
+          lastError = err;
+        }
+      }
+
+      throw lastError || new Error('Could not start video source');
+    }
+
+    async function startCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setStatus('Trinh duyet nay khong ho tro mo camera web.', 'error');
+        updateCameraDiagnostics();
+        return;
+      }
+
+      try {
+        stopCamera();
+        setStatus('Dang yeu cau quyen camera...', '');
+        stream = await openCameraStream();
+        lastCameraError = null;
+        video.srcObject = stream;
+        await video.play();
+        await refreshCameraOptions();
+        await updateCameraDiagnostics();
+        setStatus('Dang quet QR... dua ma vao khung xanh.', 'ok');
+        scanLoop();
+      } catch (err) {
+        lastCameraError = err;
+        await updateCameraDiagnostics();
+        setStatus('Khong mo duoc camera: ' + humanizeCameraError(err), 'error');
+      }
+    }
+
+    function stopCamera() {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+      if (video) {
+        video.srcObject = null;
+      }
+    }
+
+    function scanLoop() {
+      if (!video.videoWidth || !video.videoHeight) {
+        rafId = requestAnimationFrame(scanLoop);
+        return;
+      }
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      let decoded = null;
+
+      if ('BarcodeDetector' in window) {
+        const detector = new BarcodeDetector({ formats: ['qr_code'] });
+        detector.detect(canvas).then(codes => {
+          if (codes && codes.length > 0 && codes[0].rawValue) {
+            onQrDetected(codes[0].rawValue);
+          } else {
+            rafId = requestAnimationFrame(scanLoop);
+          }
+        }).catch(() => {
+          decoded = jsQR(imageData.data, imageData.width, imageData.height);
+          if (decoded && decoded.data) {
+            onQrDetected(decoded.data);
+          } else {
+            rafId = requestAnimationFrame(scanLoop);
+          }
+        });
+        return;
+      }
+
+      decoded = jsQR(imageData.data, imageData.width, imageData.height);
+      if (decoded && decoded.data) {
+        onQrDetected(decoded.data);
+      } else {
+        rafId = requestAnimationFrame(scanLoop);
+      }
+    }
+
+    function onQrDetected(rawValue) {
+      ticketTokenInput.value = rawValue;
+      setStatus('Da quet duoc QR. Bam "Xac minh token" de kiem tra.', 'ok');
+      stopCamera();
+    }
+
+    async function decodeQrFromImageFile(file) {
+      if (!file) {
+        return;
+      }
+
+      try {
+        const imageUrl = URL.createObjectURL(file);
+        const image = new Image();
+
+        await new Promise((resolve, reject) => {
+          image.onload = resolve;
+          image.onerror = reject;
+          image.src = imageUrl;
+        });
+
+        canvas.width = image.naturalWidth || image.width;
+        canvas.height = image.naturalHeight || image.height;
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const decoded = jsQR(imageData.data, imageData.width, imageData.height);
+        URL.revokeObjectURL(imageUrl);
+
+        if (decoded && decoded.data) {
+          onQrDetected(decoded.data);
+          return;
+        }
+
+        setStatus('Khong doc duoc QR tu anh nay. Hay chon anh ro net hon hoac chup sat ma QR.', 'error');
+      } catch (err) {
+        setStatus('Khong mo duoc anh QR: ' + (err.message || 'unknown error'), 'error');
+      }
+    }
+
+    async function verifyToken() {
+      const token = ticketTokenInput.value.trim();
+      if (!token) {
+        verifyResult.textContent = JSON.stringify({ valid: false, detail: 'token required' }, null, 2);
+        return;
+      }
+
+      try {
+        const response = await fetch('/tickets/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          verifyResult.textContent = JSON.stringify({ valid: false, detail: data.detail || 'verify failed' }, null, 2);
+          return;
+        }
+        verifyResult.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        verifyResult.textContent = JSON.stringify({ valid: false, detail: err.message || 'network error' }, null, 2);
+      }
+    }
+
+    document.getElementById('startBtn').addEventListener('click', startCamera);
+    document.getElementById('stopBtn').addEventListener('click', () => {
+      stopCamera();
+      setStatus('Da dung camera.');
+    });
+    document.getElementById('verifyBtn').addEventListener('click', verifyToken);
+    document.getElementById('diagnoseBtn').addEventListener('click', updateCameraDiagnostics);
+    qrImageInput.addEventListener('change', (event) => {
+      const file = event.target.files && event.target.files[0];
+      decodeQrFromImageFile(file);
+    });
+
+    updateCameraDiagnostics();
+    window.addEventListener('beforeunload', stopCamera);
+  </script>
+</body>
+</html>

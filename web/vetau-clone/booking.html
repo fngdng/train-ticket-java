@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Xác nhận đặt vé</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container" style="padding:40px">
+    <h1>Xác nhận đặt vé</h1>
+    <div id="content" style="background:#fff;padding:18px;border-radius:8px;box-shadow:0 6px 18px rgba(11,38,69,0.04)"></div>
+    <p style="margin-top:12px"><a href="/">Quay về trang chủ</a></p>
+  </div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    const orderId = params.get('orderId');
+    const content = document.getElementById('content');
+    const ticket = (() => {
+      try { return JSON.parse(sessionStorage.getItem('last_ticket') || 'null'); } catch (_) { return null; }
+    })();
+    const bookingCode = id || (ticket && ticket.bookingId) || '';
+    const paymentOrderCode = orderId || (ticket && ticket.orderId) || '';
+    if(!bookingCode && !paymentOrderCode){ content.innerHTML='<p>Không tìm thấy mã đặt vé.</p>' } else {
+      const qrHtml = ticket && ticket.ticketQrUrl ? `<img src="${ticket.ticketQrUrl}" alt="QR vé" style="width:220px;height:220px;border:1px solid #e5e7eb;border-radius:12px;padding:8px;background:#fff">` : '';
+      const tokenHtml = ticket && ticket.ticketToken ? `<p><strong>Mã vé đã ký:</strong><br><code style="word-break:break-all">${ticket.ticketToken}</code></p>` : '';
+      const orderHtml = paymentOrderCode ? `<p>Mã giao dịch: <strong>${paymentOrderCode}</strong></p>` : '';
+      content.innerHTML = `<p>Đặt vé thành công. Mã đặt vé: <strong>${bookingCode || 'N/A'}</strong></p>${orderHtml}<p>${ticket?.train || ''} ${ticket?.from ? '— ' + ticket.from + ' → ' + ticket.to : ''}</p>${qrHtml}${tokenHtml}<p>Vé được ký số, nếu QR/token bị sửa thì hệ thống verify sẽ báo lỗi.</p>`
+    }
+  </script>
+</body>
+</html>

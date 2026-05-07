@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS trains (
+  id BIGSERIAL PRIMARY KEY,
+  code VARCHAR(50) UNIQUE NOT NULL,
+  origin VARCHAR(200) NOT NULL,
+  destination VARCHAR(200) NOT NULL,
+  departure VARCHAR(50) NOT NULL,
+  arrival VARCHAR(50) NOT NULL,
+  price BIGINT NOT NULL,
+  available_seats INT NOT NULL,
+  active BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_trains_code ON trains(code);

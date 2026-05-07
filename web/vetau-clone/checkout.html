@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Thanh toán - MoMo</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .checkout-container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+    .checkout-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 32px;
+      margin-bottom: 16px;
+    }
+    .checkout-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 24px;
+    }
+    .summary-section {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      border-left: 4px solid #a91d3a;
+    }
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .summary-item label {
+      color: #666;
+      font-weight: 500;
+    }
+    .summary-item value {
+      color: #1a1a1a;
+      font-weight: 600;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #1a1a1a;
+      font-size: 14px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #a91d3a;
+      box-shadow: 0 0 0 3px rgba(169, 29, 58, 0.1);
+    }
+    .momo-info {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #856404;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .btn {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn.primary {
+      background: #a91d3a;
+      color: white;
+    }
+    .btn.primary:hover:not(:disabled) {
+      background: #8b1630;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(169, 29, 58, 0.3);
+    }
+    .btn.primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .btn.secondary {
+      background: #f0f0f0;
+      color: #1a1a1a;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn.secondary:hover {
+      background: #e0e0e0;
+    }
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .success-message {
+      background: #d4edda;
+      color: #155724;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .loading-spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #a91d3a;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @media (max-width: 600px) {
+      .checkout-card {
+        padding: 20px;
+      }
+      .checkout-title {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav style="background: #1a1a1a; padding: 16px; color: white; display: flex; justify-content: space-between; align-items: center;">
+    <a href="/" style="color: white; text-decoration: none; font-weight: 600;">TrainTicket</a>
+    <div id="navAuth" style="display: none;">
+      <span id="navUser" style="margin-right: 16px;"></span>
+      <a href="#" id="navLogout" onclick="logout(event)" style="color: white; text-decoration: none;">Đăng xuất</a>
+    </div>
+    <div id="navGuest">
+      <a href="/auth.html" style="color: white; text-decoration: none; margin-right: 16px;">Đăng nhập</a>
+    </div>
+  </nav>
+
+  <div class="checkout-container">
+    <div class="checkout-card">
+      <h1 class="checkout-title">🎫 Thanh toán với MoMo</h1>
+      
+      <div id="errorMessage" class="error-message"></div>
+      <div id="successMessage" class="success-message"></div>
+
+      <div id="summary" style="display: none;">
+        <div class="summary-section">
+          <div class="summary-item">
+            <label>Chuyến tàu:</label>
+            <value id="summaryTrain"></value>
+          </div>
+          <div class="summary-item">
+            <label>Tuyến đường:</label>
+            <value id="summaryRoute"></value>
+          </div>
+          <div class="summary-item">
+            <label>Khởi hành:</label>
+            <value id="summaryDeparture"></value>
+          </div>
+          <div class="summary-item" style="margin-bottom: 0;">
+            <label>Giá vé:</label>
+            <value id="summaryPrice" style="color: #a91d3a;"></value>
+          </div>
+        </div>
+      </div>
+
+      <form id="checkoutForm" style="display: none;">
+        <div class="momo-info">
+          💳 Bạn sẽ được chuyển đến cổng thanh toán MoMo để hoàn tất giao dịch
+        </div>
+
+        <div class="form-group">
+          <label>Họ tên hành khách *</label>
+          <input id="passengerName" type="text" required placeholder="Nhập họ tên">
+        </div>
+
+        <div class="form-group">
+          <label>Số điện thoại *</label>
+          <input id="passengerPhone" type="tel" required placeholder="Nhập 10 chữ số">
+        </div>
+
+        <div class="form-group">
+          <label>Email *</label>
+          <input id="passengerEmail" type="email" required placeholder="user@example.com">
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn primary">
+            <span class="loading-spinner" id="spinner"></span>
+            <span id="btnText">Tiếp tục thanh toán với MoMo</span>
+          </button>
+          <a href="/" class="btn secondary">Hủy</a>
+        </div>
+      </form>
+
+      <div id="noBooking" style="text-align: center; padding: 40px 0; display: none;">
+        <p style="font-size: 16px; color: #666; margin-bottom: 16px;">Không có chuyến đã chọn</p>
+        <a href="/" class="btn primary" style="display: inline-block; width: auto; padding: 12px 32px;">Quay lại trang chủ</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('auth_token');
+    const user = localStorage.getItem('user');
+
+    function logout(e) {
+      e.preventDefault();
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+      location.href = '/auth.html';
+    }
+
+    function updateNavbar() {
+      if (token && user) {
+        try {
+          const userData = JSON.parse(user);
+          document.getElementById('navGuest').style.display = 'none';
+          document.getElementById('navAuth').style.display = 'block';
+          document.getElementById('navUser').innerText = `Xin chào, ${userData.fullName}`;
+        } catch (_) {}
+      } else {
+        document.getElementById('navGuest').style.display = 'block';
+        document.getElementById('navAuth').style.display = 'none';
+      }
+    }
+
+    updateNavbar();
+
+    let selected = null;
+    const selectedRaw = sessionStorage.getItem('selected_train') || sessionStorage.getItem('pending_train');
+    try { selected = JSON.parse(selectedRaw || 'null'); } catch (_) { selected = null; }
+
+    const formElement = document.getElementById('checkoutForm');
+    const summaryElement = document.getElementById('summary');
+    const noBookingElement = document.getElementById('noBooking');
+
+    if (!selected) {
+      summaryElement.style.display = 'none';
+      formElement.style.display = 'none';
+      noBookingElement.style.display = 'block';
+    } else {
+      document.getElementById('summaryTrain').innerText = selected.name || selected.code || '--';
+      document.getElementById('summaryRoute').innerText = `${selected.from || ''} → ${selected.to || ''}`;
+      document.getElementById('summaryDeparture').innerText = `${selected.departure || ''} - ${selected.arrival || ''}`;
+      document.getElementById('summaryPrice').innerText = Number(selected.price || 0).toLocaleString() + ' VND';
+      summaryElement.style.display = 'block';
+      formElement.style.display = 'block';
+      noBookingElement.style.display = 'none';
+    }
+
+    document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!selected) return;
+
+      const passengerName = document.getElementById('passengerName').value;
+      const passengerPhone = document.getElementById('passengerPhone').value;
+      const passengerEmail = document.getElementById('passengerEmail').value;
+
+      const btn = e.target.querySelector('button[type="submit"]');
+      const originalText = document.getElementById('btnText').innerText;
+      const spinner = document.getElementById('spinner');
+      
+      btn.disabled = true;
+      spinner.style.display = 'inline-block';
+
+      const errorDiv = document.getElementById('errorMessage');
+      const successDiv = document.getElementById('successMessage');
+      errorDiv.style.display = 'none';
+      successDiv.style.display = 'none';
+
+      try {
+        document.getElementById('btnText').innerText = 'Đang xử lý...';
+
+        // Step 1: Create booking first to get bookingId
+        let bookingId = 'temp_' + Date.now();
+        
+        // Step 2: If not authenticated, we need to show mock ID
+        if (!token) {
+          errorDiv.innerText = 'Vui lòng đăng nhập trước khi thanh toán';
+          errorDiv.style.display = 'block';
+          btn.disabled = false;
+          spinner.style.display = 'none';
+          document.getElementById('btnText').innerText = originalText;
+          return;
+        }
+
+        // Create booking
+        const bookingBody = {
+          train: selected.name || selected.code,
+          from: selected.from,
+          to: selected.to,
+          departure: selected.departure,
+          arrival: selected.arrival,
+          price: selected.price,
+          passengerName,
+          passengerPhone,
+          passengerEmail,
+          paymentMethod: 'MOMO',
+          paymentStatus: 'PENDING'
+        };
+
+        const bookingRes = await fetch('/bookings/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(bookingBody)
+        });
+
+        if (!bookingRes.ok) {
+          throw new Error('Failed to create booking');
+        }
+
+        const bookingData = await bookingRes.json();
+        bookingId = bookingData.bookingId;
+
+        document.getElementById('btnText').innerText = 'Kết nối với MoMo...';
+
+        // Step 3: Request MoMo payment
+        const paymentBody = {
+          amount: selected.price.toString(),
+          bookingId: bookingId,
+          email: passengerEmail,
+          phone: passengerPhone
+        };
+
+        const paymentRes = await fetch('/payments/momo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(paymentBody)
+        });
+
+        const paymentData = await paymentRes.json();
+
+        if (!paymentData.success) {
+          throw new Error(paymentData.detail || 'MoMo payment failed');
+        }
+
+        // Save booking info
+        sessionStorage.setItem('last_ticket', JSON.stringify({
+          bookingId: bookingId,
+          orderId: paymentData.orderId,
+          ticketToken: bookingData.ticketToken || '',
+          ticketQrUrl: bookingData.ticketQrUrl || '',
+          train: selected.name || selected.code || '',
+          from: selected.from || '',
+          to: selected.to || '',
+          departure: selected.departure || '',
+          arrival: selected.arrival || '',
+          paymentStatus: 'PENDING',
+          createdAt: new Date().toISOString()
+        }));
+
+        sessionStorage.removeItem('selected_train');
+        sessionStorage.removeItem('pending_train');
+
+        // In test mode, redirect to local booking confirmation to show booking code immediately.
+        const isTestMode = String(paymentData.message || '').toUpperCase().includes('TEST MODE');
+        if (isTestMode) {
+          window.location.href = `/booking.html?id=${encodeURIComponent(bookingId)}`;
+          return;
+        }
+
+        // Redirect to MoMo payment page
+        if (paymentData.payUrl) {
+          window.location.href = paymentData.payUrl;
+        } else {
+          throw new Error('No payment URL received from MoMo');
+        }
+      } catch (err) {
+        console.error(err);
+        errorDiv.innerText = '⚠️ ' + (err.message || 'Không thể xác nhận đặt vé');
+        errorDiv.style.display = 'block';
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        document.getElementById('btnText').innerText = originalText;
+      }
+    });
+  </script>
+</body>
+</html>
+

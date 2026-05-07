@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>2FA Inbox Demo</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(140deg, #f6f8ff 0%, #eaf0ff 45%, #f8fbff 100%);
+      color: #1d2435;
+      min-height: 100vh;
+      padding: 24px 14px;
+    }
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    .hero {
+      background: linear-gradient(135deg, #1f4fd8 0%, #05a7c8 100%);
+      color: #fff;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 12px 28px rgba(33, 76, 183, 0.25);
+      margin-bottom: 14px;
+    }
+    .hero h1 { margin: 0 0 6px; font-size: 24px; }
+    .hero p { margin: 0; opacity: .95; font-size: 14px; }
+    .panel {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(21, 44, 110, 0.08);
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .row input {
+      flex: 1;
+      min-width: 200px;
+      border: 1px solid #d5dff5;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn.primary { background: #3258de; color: #fff; }
+    .btn.ghost { background: #edf1ff; color: #2840ab; }
+    .status {
+      margin-top: 10px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      background: #edf2ff;
+      color: #2840ab;
+      font-size: 13px;
+    }
+    .status.error { background: #ffe8e8; color: #9f1e1e; }
+    .messages {
+      display: grid;
+      gap: 10px;
+    }
+    .message {
+      border: 1px solid #dde5f7;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fff;
+    }
+    .meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: #5a6888;
+      margin-bottom: 8px;
+    }
+    .chip {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #edf1ff;
+      color: #2d46af;
+      font-weight: 600;
+      font-size: 11px;
+    }
+    .code {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: #0f172a;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    .hint {
+      margin-top: 8px;
+      color: #627197;
+      font-size: 12px;
+    }
+    .nav a {
+      color: #2950ce;
+      text-decoration: none;
+      margin-right: 12px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Hộp Nhận Mã 2FA (Demo)</h1>
+      <p>Giả lập nơi nhận mã SMS/Email để test luồng xác minh 2 lớp trong môi trường dev.</p>
+    </section>
+
+    <section class="panel">
+      <div class="row">
+        <input id="usernameInput" placeholder="Nhập username (ví dụ: testuser)">
+        <button id="loadBtn" class="btn primary" type="button">Tải mã</button>
+        <button id="autoBtn" class="btn ghost" type="button">Bật auto refresh</button>
+      </div>
+      <div id="status" class="status">Sẵn sàng.</div>
+      <div class="hint">Lưu ý: Trang này chỉ dành cho demo/test nội bộ. Mã hiển thị sẽ hết hạn theo thời gian ở backend.</div>
+    </section>
+
+    <section class="panel">
+      <div id="messages" class="messages"></div>
+      <div class="nav" style="margin-top:10px;">
+        <a href="/auth.html">Đăng nhập</a>
+        <a href="/account.html">Quản lí tài khoản</a>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const messagesEl = document.getElementById('messages');
+    const usernameInput = document.getElementById('usernameInput');
+    const autoBtn = document.getElementById('autoBtn');
+
+    let autoTimer = null;
+
+    function setStatus(message, isError = false) {
+      statusEl.className = 'status' + (isError ? ' error' : '');
+      statusEl.textContent = message;
+    }
+
+    function fmtTime(value) {
+      const d = new Date(value);
+      if (isNaN(d.getTime())) return value || '-';
+      return d.toLocaleString('vi-VN');
+    }
+
+    function renderMessages(payload) {
+      const list = payload.messages || [];
+      if (list.length === 0) {
+        messagesEl.innerHTML = '<div class="message">Chưa có mã nào cho username này.</div>';
+        return;
+      }
+
+      messagesEl.innerHTML = list.map((item) => `
+        <div class="message">
+          <div class="meta">
+            <span class="chip">${item.channel || '-'}</span>
+            <span>Đích nhận: ${item.destination || '-'}</span>
+            <span>Tạo lúc: ${fmtTime(item.createdAt)}</span>
+            <span>Hết hạn: ${fmtTime(item.expiresAt)}</span>
+          </div>
+          <div class="code">${item.code || '------'}</div>
+        </div>
+      `).join('');
+    }
+
+    async function loadInbox() {
+      const username = usernameInput.value.trim();
+      if (!username) {
+        setStatus('Vui lòng nhập username để tải mã.', true);
+        return;
+      }
+
+      try {
+        setStatus('Đang tải mã 2FA...');
+        const response = await fetch(`/auth/2fa/inbox?username=${encodeURIComponent(username)}`);
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.detail || 'Không tải được inbox 2FA');
+        }
+        renderMessages(data);
+        setStatus(`Đã tải ${data.count || 0} mã cho @${data.username}`);
+      } catch (err) {
+        setStatus(err.message || 'Lỗi tải inbox', true);
+      }
+    }
+
+    function toggleAutoRefresh() {
+      if (autoTimer) {
+        clearInterval(autoTimer);
+        autoTimer = null;
+        autoBtn.textContent = 'Bật auto refresh';
+        setStatus('Đã tắt auto refresh.');
+        return;
+      }
+      autoTimer = setInterval(loadInbox, 3000);
+      autoBtn.textContent = 'Tắt auto refresh';
+      setStatus('Đang auto refresh mỗi 3 giây.');
+      loadInbox();
+    }
+
+    document.getElementById('loadBtn').addEventListener('click', loadInbox);
+    autoBtn.addEventListener('click', toggleAutoRefresh);
+
+    const params = new URLSearchParams(window.location.search);
+    const prefillUser = params.get('username');
+    if (prefillUser) {
+      usernameInput.value = prefillUser;
+      loadInbox();
+    }
+  </script>
+</body>
+</html>

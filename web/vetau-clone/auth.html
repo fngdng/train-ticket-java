@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Đăng nhập / Đăng ký - TrainTicket</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 1000px;
+      padding: 16px;
+    }
+
+    .auth-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      min-height: 500px;
+    }
+
+    .auth-panel {
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .auth-panel.login {
+      border-right: 1px solid #f0f0f0;
+    }
+
+    .auth-panel.register {
+      background: #f9f9f9;
+    }
+
+    .auth-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .auth-subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 32px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      background: rgba(102, 126, 234, 0.02);
+    }
+
+    .form-group input::placeholder {
+      color: #999;
+    }
+
+    .error-message {
+      color: #d32f2f;
+      font-size: 13px;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .form-group.error input {
+      border-color: #d32f2f;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn.primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn.primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn.secondary {
+      background: #f0f0f0;
+      color: #1a1a1a;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn.secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .form-footer {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .form-footer a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .form-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .back-home {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .back-home:hover {
+      transform: translateX(-4px);
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .alert.error {
+      background: #ffebee;
+      color: #c62828;
+      border-left: 4px solid #c62828;
+    }
+
+    .alert.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-left: 4px solid #2e7d32;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .auth-wrapper {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+
+      .auth-panel.login {
+        border-right: none;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .auth-panel.register {
+        background: white;
+      }
+
+      .auth-panel {
+        padding: 32px 24px;
+      }
+
+      .auth-title {
+        font-size: 24px;
+      }
+
+      .back-home {
+        position: relative;
+        top: 0;
+        left: 0;
+        color: #667eea;
+        margin-bottom: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="back-home" href="/">← Quay về trang chủ</a>
+
+  <div class="auth-container">
+    <div class="auth-wrapper">
+      <!-- Login Panel -->
+      <div class="auth-panel login">
+        <h2 class="auth-title">🎫 Đăng nhập</h2>
+        <p class="auth-subtitle">Truy cập tài khoản của bạn</p>
+
+        <div id="loginAlert" class="alert"></div>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="loginUsername">Tên tài khoản</label>
+            <input 
+              id="loginUsername" 
+              type="text" 
+              required 
+              placeholder="Nhập tên tài khoản"
+              autocomplete="username"
+            >
+            <div class="error-message"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="loginPassword">Mật khẩu</label>
+            <input 
+              id="loginPassword" 
+              type="password" 
+              required 
+              placeholder="Nhập mật khẩu"
+              autocomplete="current-password"
+            >
+            <div class="error-message"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="login2faChannel">Kênh xác minh 2 lớp</label>
+            <select id="login2faChannel">
+              <option value="email">Email</option>
+              <option value="sms">SMS</option>
+              <option value="passkey">Passkey code</option>
+              <option value="totp">Google Authenticator</option>
+            </select>
+          </div>
+
+          <div id="login2faBox" style="display:none;background:#f8f9ff;border:1px solid #dfe4ff;border-radius:8px;padding:12px;margin-bottom:14px;">
+            <div style="font-size:13px;color:#334; margin-bottom:8px;" id="login2faHint">Nhập mã 2FA để tiếp tục.</div>
+            <input id="login2faCode" type="text" placeholder="Nhập mã 2FA" maxlength="12">
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn primary">
+              <span id="loginBtnText">Đăng nhập</span>
+            </button>
+          </div>
+        </form>
+
+        <p class="form-footer">
+          Chưa có tài khoản? <a href="#signup" onclick="switchTab(event)">Đăng ký ngay</a>
+        </p>
+      </div>
+
+      <!-- Register Panel -->
+      <div class="auth-panel register">
+        <h2 class="auth-title">✨ Đăng ký</h2>
+        <p class="auth-subtitle">Tạo tài khoản mới</p>
+
+        <div id="regAlert" class="alert"></div>
+
+        <form id="regForm">
+          <div class="form-group">
+            <label for="regName">Họ tên đầy đủ</label>
+            <input 
+              id="regName" 
+              type="text" 
+              required 
+              placeholder="Ví dụ: Nguyễn Văn A"
+              autocomplete="name"
+            >
+            <div class="error-message"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="regUsername">Tên tài khoản</label>
+            <input 
+              id="regUsername" 
+              type="text" 
+              required 
+              placeholder="Chọn tên đăng nhập"
+              autocomplete="username"
+              minlength="3"
+            >
+            <div class="error-message"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="regPassword">Mật khẩu</label>
+            <input 
+              id="regPassword" 
+              type="password" 
+              required 
+              placeholder="Tối thiểu 6 ký tự"
+              autocomplete="new-password"
+              minlength="6"
+            >
+            <div class="error-message"></div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn primary">
+              <span id="regBtnText">Đăng ký</span>
+            </button>
+          </div>
+        </form>
+
+        <p class="form-footer">
+          Đã có tài khoản? <a href="#login" onclick="switchTab(event)">Đăng nhập</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let pendingLogin = null;
+
+    function applyLogin2faInputMode(channel) {
+      const input = document.getElementById('login2faCode');
+      const normalized = (channel || '').toLowerCase();
+      if (normalized === 'passkey') {
+        input.type = 'password';
+        input.maxLength = 32;
+        input.placeholder = 'Nhập passkey code';
+      } else {
+        input.type = 'text';
+        input.maxLength = 6;
+        input.placeholder = normalized === 'totp' ? 'Nhập mã Google Authenticator' : 'Nhập mã 6 chữ số';
+      }
+    }
+
+    function resetPendingTwoFactorUi() {
+      pendingLogin = null;
+      const login2faBox = document.getElementById('login2faBox');
+      const login2faCodeInput = document.getElementById('login2faCode');
+      const loginBtnText = document.getElementById('loginBtnText');
+
+      login2faBox.style.display = 'none';
+      login2faCodeInput.value = '';
+      loginBtnText.innerText = 'Đăng nhập';
+      applyLogin2faInputMode(document.getElementById('login2faChannel').value);
+    }
+
+    function switchTab(e) {
+      e.preventDefault();
+      // This is mainly for mobile/responsive layout guidance
+    }
+
+    function showAlert(formId, message, type = 'error') {
+      const alertId = formId === 'loginForm' ? 'loginAlert' : 'regAlert';
+      const alertDiv = document.getElementById(alertId);
+      alertDiv.className = `alert ${type}`;
+      alertDiv.innerText = message;
+      alertDiv.style.display = 'block';
+    }
+
+    function hideAlert(formId) {
+      const alertId = formId === 'loginForm' ? 'loginAlert' : 'regAlert';
+      document.getElementById(alertId).style.display = 'none';
+    }
+
+    function clearErrors(formId) {
+      const form = document.getElementById(formId);
+      form.querySelectorAll('.form-group').forEach(group => {
+        group.classList.remove('error');
+        const msg = group.querySelector('.error-message');
+        if (msg) msg.style.display = 'none';
+      });
+    }
+
+    async function saveAuth(token, user) {
+      localStorage.setItem('auth_token', token || '');
+      localStorage.setItem('user', JSON.stringify(user || {}));
+    }
+
+    // Login Form
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors('loginForm');
+      hideAlert('loginForm');
+
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const selected2faChannel = document.getElementById('login2faChannel').value;
+      const login2faBox = document.getElementById('login2faBox');
+      const login2faCode = document.getElementById('login2faCode').value.trim();
+
+      if (!username || !password) {
+        showAlert('loginForm', 'Vui lòng nhập tài khoản và mật khẩu');
+        return;
+      }
+
+      const btn = e.target.querySelector('button[type="submit"]');
+      const btnText = document.getElementById('loginBtnText');
+      const originalText = btnText.innerText;
+
+      // If user changed credentials after a previous 2FA prompt, restart normal login flow.
+      if (pendingLogin && (pendingLogin.username !== username || pendingLogin.password !== password)) {
+        resetPendingTwoFactorUi();
+      }
+
+      btn.disabled = true;
+      btnText.innerHTML = '<span class="loading-spinner"></span>Đang đăng nhập...';
+
+      try {
+        let res;
+        if (pendingLogin && login2faBox.style.display !== 'none') {
+          if (!login2faCode) {
+            showAlert('loginForm', 'Nhập mã 2FA để xác minh hoặc đăng nhập lại bằng tài khoản chưa bật 2FA');
+            btn.disabled = false;
+            btnText.innerText = 'Xác minh 2FA';
+            return;
+          }
+          res = await fetch('/auth/login/2fa/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: pendingLogin.username,
+              password: pendingLogin.password,
+              code: login2faCode,
+              twoFactorChannel: pendingLogin.twoFactorChannel
+            })
+          });
+        } else {
+          res = await fetch('/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password, twoFactorChannel: selected2faChannel })
+          });
+        }
+
+        const data = await res.json();
+
+        if (res.ok && data.token) {
+          await saveAuth(data.token, data.user || {});
+          showAlert('loginForm', 'Đăng nhập thành công!', 'success');
+          resetPendingTwoFactorUi();
+          btnText.innerText = originalText;
+          btn.disabled = false;
+          
+          setTimeout(() => {
+            const pending = sessionStorage.getItem('pending_train');
+            if ((data.user?.role || '').toUpperCase() === 'ADMIN') {
+              location.href = '/admin-dashboard.html';
+            } else {
+              location.href = pending ? '/checkout.html' : '/account.html';
+            }
+          }, 500);
+        } else if (res.status === 202 && data.twoFactorRequired) {
+          pendingLogin = {
+            username,
+            password,
+            twoFactorChannel: data.channel || selected2faChannel
+          };
+          login2faBox.style.display = 'block';
+          const channelLabelMap = {
+            sms: 'SMS',
+            email: 'Email',
+            passkey: 'Passkey code',
+            totp: 'Google Authenticator'
+          };
+          document.getElementById('login2faHint').innerText = `Nhập mã ${channelLabelMap[pendingLogin.twoFactorChannel] || pendingLogin.twoFactorChannel} để hoàn tất đăng nhập.`;
+          applyLogin2faInputMode(pendingLogin.twoFactorChannel);
+          showAlert('loginForm', 'Xác minh 2 lớp: nhập mã rồi bấm Đăng nhập lần nữa', 'success');
+          btn.disabled = false;
+          btnText.innerText = 'Xác minh 2FA';
+        } else {
+          showAlert('loginForm', data.detail || 'Tài khoản hoặc mật khẩu không chính xác');
+          btn.disabled = false;
+          btnText.innerText = originalText;
+        }
+      } catch (err) {
+        console.error(err);
+        showAlert('loginForm', 'Lỗi kết nối, vui lòng thử lại');
+        btn.disabled = false;
+        btnText.innerText = originalText;
+      }
+    });
+
+    document.getElementById('login2faChannel').addEventListener('change', (e) => {
+      applyLogin2faInputMode(e.target.value);
+      if (pendingLogin && document.getElementById('login2faBox').style.display !== 'none') {
+        pendingLogin.twoFactorChannel = e.target.value;
+      }
+    });
+
+    // Register Form
+    document.getElementById('regForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors('regForm');
+      hideAlert('regForm');
+
+      const fullName = document.getElementById('regName').value.trim();
+      const username = document.getElementById('regUsername').value.trim();
+      const password = document.getElementById('regPassword').value;
+
+      let hasErrors = false;
+
+      if (!fullName) {
+        showAlert('regForm', 'Vui lòng nhập họ tên');
+        hasErrors = true;
+      }
+
+      if (!username || username.length < 3) {
+        showAlert('regForm', 'Tên tài khoản tối thiểu 3 ký tự');
+        hasErrors = true;
+      }
+
+      if (!password || password.length < 6) {
+        showAlert('regForm', 'Mật khẩu tối thiểu 6 ký tự');
+        hasErrors = true;
+      }
+
+      if (hasErrors) return;
+
+      const btn = e.target.querySelector('button[type="submit"]');
+      const btnText = document.getElementById('regBtnText');
+      const originalText = btnText.innerText;
+
+      btn.disabled = true;
+      btnText.innerHTML = '<span class="loading-spinner"></span>Đang đăng ký...';
+
+      try {
+        const res = await fetch('/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fullName, username, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.token) {
+          await saveAuth(data.token, data.user || {});
+          showAlert('regForm', 'Đăng ký thành công!', 'success');
+          
+          setTimeout(() => {
+            const pending = sessionStorage.getItem('pending_train');
+            location.href = pending ? '/checkout.html' : '/account.html';
+          }, 500);
+        } else {
+          showAlert('regForm', data.detail || 'Đăng ký thất bại, vui lòng kiểm tra lại');
+          btn.disabled = false;
+          btnText.innerText = originalText;
+        }
+      } catch (err) {
+        console.error(err);
+        showAlert('regForm', 'Lỗi kết nối, vui lòng thử lại');
+        btn.disabled = false;
+        btnText.innerText = originalText;
+      }
+    });
+
+    // Check if already logged in
+    const token = localStorage.getItem('auth_token');
+    applyLogin2faInputMode(document.getElementById('login2faChannel').value);
+    if (token) {
+      location.href = '/';
+    }
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Dashboard — Quản Lý Đặt Vé</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', sans-serif; 
+      background: #f5f7fa;
+      color: #333;
+    }
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .navbar h1 { font-size: 24px; }
+    .navbar-right {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    .user-info { font-size: 14px; opacity: 0.9; }
+    .btn-logout {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.5);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    .btn-logout:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .stat-card h3 { color: #667eea; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; }
+    .stat-card .value { font-size: 32px; font-weight: bold; color: #333; }
+    .stat-card .detail { font-size: 12px; color: #999; margin-top: 5px; }
+    .bookings-section {
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .bookings-section h2 { margin-bottom: 20px; font-size: 20px; color: #333; }
+    .filters {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .filters select, .filters input {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .filters select:focus, .filters input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .btn-refresh {
+      padding: 8px 16px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    .btn-refresh:hover {
+      background: #764ba2;
+    }
+    .bookings-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .bookings-table thead {
+      background: #f0f2f5;
+      border-bottom: 2px solid #667eea;
+    }
+    .bookings-table th {
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      color: #333;
+    }
+    .bookings-table td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    .bookings-table tr:hover {
+      background: #f9f9f9;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge.pending { background: #fff3cd; color: #856404; }
+    .badge.completed { background: #d4edda; color: #155724; }
+    .badge.cancelled { background: #f8d7da; color: #721c24; }
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #667eea;
+    }
+    .error {
+      background: #fee;
+      color: #c33;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #fcc;
+    }
+    @media (max-width: 768px) {
+      .navbar { flex-direction: column; gap: 15px; text-align: center; }
+      .navbar-right { flex-direction: column; gap: 10px; }
+      .bookings-table { font-size: 12px; }
+      .bookings-table th, .bookings-table td { padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1>🛡️ Admin Dashboard</h1>
+    <div class="navbar-right">
+      <div class="user-info">
+        Xin chào, <strong id="admin-name"></strong>
+      </div>
+      <button class="btn-logout" onclick="logout()">Đăng Xuất</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="error-msg"></div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <h3>Tổng đặt vé</h3>
+        <div class="value" id="total-bookings">0</div>
+        <div class="detail">Tất cả thời gian</div>
+      </div>
+      <div class="stat-card">
+        <h3>Đợi xác nhận</h3>
+        <div class="value" id="pending-bookings">0</div>
+        <div class="detail">Chờ thanh toán</div>
+      </div>
+      <div class="stat-card">
+        <h3>Hoàn thành</h3>
+        <div class="value" id="completed-bookings">0</div>
+        <div class="detail">Đã xác nhận</div>
+      </div>
+      <div class="stat-card">
+        <h3>Doanh thu (VND)</h3>
+        <div class="value" id="total-revenue">0</div>
+        <div class="detail">Từ các giao dịch</div>
+      </div>
+    </div>
+
+    <div class="bookings-section">
+      <h2>Danh Sách Đặt Vé</h2>
+      
+      <div class="filters">
+        <select id="filter-status" onchange="loadBookings()">
+          <option value="">Tất cả trạng thái</option>
+          <option value="PENDING">Đợi xác nhận</option>
+          <option value="COMPLETED">Hoàn thành</option>
+          <option value="CANCELLED">Đã hủy</option>
+        </select>
+        <input type="text" id="search" placeholder="Tìm theo ID, khách, điểm đi/đến..." onkeyup="searchBookings()">
+        <button class="btn-refresh" onclick="loadBookings()">🔄 Làm Mới</button>
+      </div>
+
+      <div id="loading" class="loading" style="display:none">Đang tải dữ liệu...</div>
+      <div id="bookings-container">
+        <table class="bookings-table">
+          <thead>
+            <tr>
+              <th>Booking ID</th>
+              <th>Khách Hàng</th>
+              <th>Điểm Đi - Đến</th>
+              <th>Tàu</th>
+              <th>Giá (VND)</th>
+              <th>Thanh Toán</th>
+              <th>Trạng Thái</th>
+              <th>Ngày Đặt</th>
+            </tr>
+          </thead>
+          <tbody id="bookings-list">
+            <tr><td colspan="8" class="no-data">Không có dữ liệu</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allBookings = [];
+
+    async function checkAuth() {
+      const token = localStorage.getItem('admin_token');
+      const user = JSON.parse(localStorage.getItem('admin_user') || '{}');
+      
+      if (!token || (user.role || '').toUpperCase() !== 'ADMIN') {
+        window.location.href = '/admin-login.html';
+        return;
+      }
+      
+      document.getElementById('admin-name').innerText = user.username || 'Admin';
+    }
+
+    async function loadBookings() {
+      const token = localStorage.getItem('admin_token');
+      const loading = document.getElementById('loading');
+      const tbody = document.getElementById('bookings-list');
+      const errorMsg = document.getElementById('error-msg');
+      
+      loading.style.display = 'block';
+      errorMsg.innerHTML = '';
+
+      try {
+        const res = await fetch('/bookings', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch bookings');
+        }
+
+        allBookings = await res.json();
+        renderBookings(allBookings);
+        updateStats();
+      } catch (err) {
+        errorMsg.innerHTML = `<div class="error">Lỗi: ${err.message}</div>`;
+        tbody.innerHTML = '<tr><td colspan="8" class="no-data">Không thể tải dữ liệu</td></tr>';
+      } finally {
+        loading.style.display = 'none';
+      }
+    }
+
+    function renderBookings(bookings) {
+      const tbody = document.getElementById('bookings-list');
+      
+      if (!bookings || bookings.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="no-data">Không có dữ liệu</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = bookings.map(b => {
+        const dateObj = new Date(b.createdAt);
+        const dateStr = dateObj.toLocaleDateString('vi-VN') + ' ' + dateObj.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+        
+        const statusBadge = b.paymentStatus === 'PENDING' 
+          ? '<span class="badge pending">Chờ thanh toán</span>'
+          : '<span class="badge completed">Hoàn thành</span>';
+        
+        return `
+          <tr>
+            <td><strong>${b.bookingId || ''}</strong></td>
+            <td>${b.passengerName || ''}<br><small>${b.passengerPhone || ''}</small></td>
+            <td>${b.origin || ''} → ${b.destination || ''}</td>
+            <td>${b.train || ''}</td>
+            <td>${(b.price || 0).toLocaleString('vi-VN')}</td>
+            <td>${b.paymentMethod || 'COD'}</td>
+            <td>${statusBadge}</td>
+            <td>${dateStr}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateStats() {
+      const total = allBookings.length;
+      const pending = allBookings.filter(b => b.paymentStatus === 'PENDING').length;
+      const completed = allBookings.filter(b => b.paymentStatus === 'COMPLETED').length;
+      const revenue = allBookings.reduce((sum, b) => sum + (b.price || 0), 0);
+
+      document.getElementById('total-bookings').innerText = total;
+      document.getElementById('pending-bookings').innerText = pending;
+      document.getElementById('completed-bookings').innerText = completed;
+      document.getElementById('total-revenue').innerText = revenue.toLocaleString('vi-VN');
+    }
+
+    function searchBookings() {
+      const query = document.getElementById('search').value.toLowerCase();
+      const status = document.getElementById('filter-status').value;
+      
+      let filtered = allBookings;
+      
+      if (query) {
+        filtered = filtered.filter(b => 
+          (b.bookingId || '').toLowerCase().includes(query) ||
+          (b.passengerName || '').toLowerCase().includes(query) ||
+          (b.origin || '').toLowerCase().includes(query) ||
+          (b.destination || '').toLowerCase().includes(query)
+        );
+      }
+      
+      if (status) {
+        filtered = filtered.filter(b => b.paymentStatus === status);
+      }
+      
+      renderBookings(filtered);
+    }
+
+    function logout() {
+      localStorage.removeItem('admin_token');
+      localStorage.removeItem('admin_user');
+      window.location.href = '/admin-login.html';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      checkAuth();
+      loadBookings();
+      // Refresh every 30 seconds
+      setInterval(loadBookings, 30000);
+    });
+  </script>
+</body>
+</html>

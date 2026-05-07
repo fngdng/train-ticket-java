@@ -1,0 +1,73 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: train_ticket
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - tnet
+
+  auth-service:
+    build: ./auth-service
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/train_ticket
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - BOOTSTRAP_ADMIN_SECRET=MySecureBootstrapSecret123!
+    ports:
+      - "8080:8080"
+    networks:
+      - tnet
+
+  trains-service:
+    build: ./services/trains
+    depends_on:
+      - db
+    environment:
+      - SERVER_PORT=8081
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/train_ticket
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    ports:
+      - "8082:8081"
+    networks:
+      - tnet
+
+  bookings-service:
+    build: ./services/bookings
+    depends_on:
+      - db
+    environment:
+      - SERVER_PORT=8082
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/train_ticket
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+      - AUTH_SERVICE_URL=http://auth-service:8080
+      - MOMO_PARTNER_CODE=MOMOAFDF20231115
+      - MOMO_ACCESS_KEY=F8590A51A5A2CA5A
+      - MOMO_SECRET_KEY=fc6c7d6f367cd302330b038fbb16a05e
+    ports:
+      - "8083:8082"
+    networks:
+      - tnet
+
+  web:
+    build: ./web
+    ports:
+      - "8081:80"
+    networks:
+      - tnet
+
+volumes:
+  db-data:
+
+networks:
+  tnet:
+    driver: bridge
